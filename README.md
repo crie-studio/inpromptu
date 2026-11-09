@@ -14,6 +14,11 @@
 </p>
 
 <p align="center">
+  Desenvolvido por <b>Luiz Felipe Pitzer</b> · <a href="https://lfp.app.br">lfp.app.br</a> · versão 2.0.1
+  (<a href="CHANGELOG.md">histórico de versões</a>)
+</p>
+
+<p align="center">
   <img src="docs/images/teleprompter.png" width="520" alt="Teleprompter do InPromptu destacando a palavra que está sendo lida">
   &nbsp;
   <img src="docs/images/celular.png" width="210" alt="Controle pelo celular">
@@ -116,7 +121,8 @@ automaticamente na primeira abertura.
 
 O InPromptu não envia nenhuma informação pela rede, a não ser quando você pede: baixar um modelo de voz (do site
 do projeto [Vosk](https://alphacephei.com/vosk/models)), ligar o controle pelo celular (só na sua rede local, com
-um código secreto no link) ou conectar ao OBS. Não há telemetria nem estatísticas de uso.
+um código secreto no link) ou conectar ao OBS. O site do autor só é aberto no navegador quando você clica no
+link. Não há telemetria nem estatísticas de uso.
 
 ## Code signing policy
 
@@ -163,7 +169,9 @@ Estrutura:
 
 ## Licença e créditos
 
-[MIT](LICENSE) © 2026 Luiz Felipe Pitzer Jacob. Componentes de terceiros e suas licenças em
+Criado e desenvolvido por **Luiz Felipe Pitzer** · <https://lfp.app.br>
+
+[MIT](LICENSE) © 2026 Luiz Felipe Pitzer. Componentes de terceiros e suas licenças em
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Reconhecimento de voz: [Vosk](https://alphacephei.com/vosk/) e [vosk-browser](https://github.com/ccoreilly/vosk-browser)

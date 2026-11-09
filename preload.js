@@ -6,7 +6,7 @@ const INVOKE = new Set([
   'doc:get', 'file:open', 'file:read', 'file:save',
   'models:list', 'models:download',
   'session:start', 'session:stop', 'session:running',
-  'overlay:init', 'remote:info', 'shortcuts:list', 'app:openExternal', 'app:openMicSettings',
+  'overlay:init', 'remote:info', 'shortcuts:list', 'app:openExternal', 'app:openMicSettings', 'app:info',
   'recording:start', 'recording:stop', 'app:openRecordings',
   'obs:status', 'obs:reconnect', 'obs:setPassword', 'app:openSubtitles', 'app:showFile',
 ]);

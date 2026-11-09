@@ -1,5 +1,11 @@
 # Novidades
 
+## 2.0.1
+
+- Créditos do autor: cartão "Criado e desenvolvido por Luiz Felipe Pitzer" na aba *Mais → Sobre*, selo no rodapé do
+  editor e na tela inicial do celular, com link para [lfp.app.br](https://lfp.app.br). A barra de título mostra
+  "InPromptu - por Luiz Felipe Pitzer".
+
 ## 2.0.0
 
 Primeira versão pública, com o nome **InPromptu**.

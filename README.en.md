@@ -13,6 +13,11 @@
 </p>
 
 <p align="center">
+  Developed by <b>Luiz Felipe Pitzer</b> · <a href="https://lfp.app.br">lfp.app.br</a> · version 2.0.1
+  (<a href="CHANGELOG.md">release history</a>, in Portuguese)
+</p>
+
+<p align="center">
   <img src="docs/images/teleprompter.png" width="520" alt="InPromptu highlighting the word being read">
   &nbsp;
   <img src="docs/images/celular.png" width="210" alt="Phone remote control">
@@ -54,7 +59,8 @@ the installer is code-signed, Windows may show "Windows protected your PC": clic
 
 InPromptu does not send any information over the network unless you ask it to: downloading a voice model (from
 the [Vosk](https://alphacephei.com/vosk/models) project), turning on the phone remote (local network only,
-protected by a secret token in the link) or connecting to OBS. There is no telemetry.
+protected by a secret token in the link) or connecting to OBS. The author's website only opens in your browser
+when you click its link. There is no telemetry.
 
 ## Code signing policy
 
@@ -72,7 +78,9 @@ npm run dist   # builds the installer into dist/
 
 ## License and credits
 
-[MIT](LICENSE) © 2026 Luiz Felipe Pitzer Jacob. Third-party components and their licenses are listed in
+Created and developed by **Luiz Felipe Pitzer** · <https://lfp.app.br>
+
+[MIT](LICENSE) © 2026 Luiz Felipe Pitzer. Third-party components and their licenses are listed in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Speech recognition by [Vosk](https://alphacephei.com/vosk/)
 and [vosk-browser](https://github.com/ccoreilly/vosk-browser); voice activity detection by
 [Silero VAD](https://github.com/snakers4/silero-vad) on [ONNX Runtime Web](https://onnxruntime.ai). The idea of a

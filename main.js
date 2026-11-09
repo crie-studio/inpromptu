@@ -17,6 +17,9 @@ const { grammarWords, tokenize } = require('./renderer/shared/text.js');
 const APP_ROOT = __dirname;
 const PRELOAD = path.join(APP_ROOT, 'preload.js');
 const ICON = path.join(APP_ROOT, 'assets', 'icon.png');
+const AUTHOR = 'Luiz Felipe Pitzer';
+const WEBSITE = 'https://lfp.app.br';
+const WINDOW_TITLE = `InPromptu - por ${AUTHOR}`;
 const PROTOCOL = 'inpromptu';
 
 // Medidas compartilhadas com renderer/overlay.css
@@ -101,7 +104,7 @@ function createEditor() {
     height: 760,
     minWidth: 860,
     minHeight: 560,
-    title: 'InPromptu',
+    title: WINDOW_TITLE,
     icon: ICON,
     backgroundColor: '#0f1013',
     show: false,
@@ -1027,6 +1030,7 @@ function registerIpc() {
     if (/^https:\/\//.test(url)) shell.openExternal(url);
   });
   ipcMain.handle('app:openMicSettings', () => shell.openExternal('ms-settings:privacy-microphone'));
+  ipcMain.handle('app:info', () => ({ version: app.getVersion(), author: AUTHOR, website: WEBSITE, title: WINDOW_TITLE }));
 }
 
 /* ───────────────────────── Ciclo de vida ───────────────────────── */

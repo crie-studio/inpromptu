@@ -13,8 +13,8 @@ with the app (Electron/Chromium libraries, `ffmpeg.dll` and others) are not sign
 
 | Role | Members |
 | --- | --- |
-| Committers and reviewers | [Luiz Felipe Pitzer Jacob](https://github.com/crie-studio) |
-| Approvers | [Luiz Felipe Pitzer Jacob](https://github.com/crie-studio) |
+| Committers and reviewers | [Luiz Felipe Pitzer](https://lfp.app.br) (GitHub: [crie-studio](https://github.com/crie-studio)) |
+| Approvers | [Luiz Felipe Pitzer](https://lfp.app.br) (GitHub: [crie-studio](https://github.com/crie-studio)) |
 
 Committers may change the source without additional review. Reviewers review every change proposed by
 non-committers (pull requests). Approvers approve each signing request. All members use multi-factor
@@ -35,6 +35,7 @@ What that means in practice:
   protected by a random token in the link, so that your phone can show and control the reading.
 - **OBS integration** is off by default. When you turn it on, InPromptu connects to the OBS WebSocket server at the
   address you type (usually your own computer).
+- The author's website ([lfp.app.br](https://lfp.app.br)) only opens in the browser when you click its link.
 - There is no telemetry, no analytics and no automatic update check.
 
 ## Reporting

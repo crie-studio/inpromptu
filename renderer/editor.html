@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
-  <title>InPromptu</title>
+  <title>InPromptu - por Luiz Felipe Pitzer</title>
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="editor.css">
 </head>
@@ -64,6 +64,9 @@ Dicas:
         <span id="run-status"></span>
         <span class="spacer"></span>
         <span id="engine-status"></span>
+        <a href="#" class="author-badge" data-href="https://lfp.app.br" title="Abrir https://lfp.app.br">
+          <span class="mono">LF</span><span class="name">Luiz Felipe Pitzer</span><i></i><span class="site">lfp.app.br ↗</span>
+        </a>
       </footer>
     </section>
 
@@ -522,7 +525,21 @@ Dicas:
 
         <!-- Sobre -->
         <section data-pane="atalhos" class="pane">
-          <h3>InPromptu</h3>
+          <h3>Sobre</h3>
+          <div class="author-card">
+            <div class="author-main">
+              <div class="author-mono">LFP</div>
+              <div class="author-who">
+                <div class="author-cap">Criado e desenvolvido por</div>
+                <div class="author-name">Luiz Felipe Pitzer</div>
+                <a href="#" class="author-site" data-href="https://lfp.app.br" title="https://lfp.app.br">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+                  lfp.app.br <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+            </div>
+            <div class="author-foot"><span id="about-version">InPromptu</span><span>© 2026</span></div>
+          </div>
           <p class="note">O teleprompter que acompanha a sua voz. Gratuito e de código aberto (licença MIT).</p>
           <p class="note">O reconhecimento de voz roda no seu computador com o <a href="#" data-href="https://alphacephei.com/vosk/">Vosk</a> (Apache 2.0). Nenhum áudio sai da sua máquina. O modelo de cada idioma é baixado uma única vez.</p>
           <p class="note">Formatos: <b>.inpromptu</b> (páginas; também abre os antigos <b>.roteiro</b>), <b>.txt</b>/<b>.md</b> (separe páginas com uma linha <code>---</code>) e <b>.pptx</b> (anotações do apresentador).</p>

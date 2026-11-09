@@ -1,10 +1,13 @@
 {
   "name": "inpromptu",
   "productName": "InPromptu",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "O teleprompter que acompanha a sua voz: gratuito, offline e de código aberto, para Windows.",
   "main": "main.js",
-  "author": "Luiz Felipe Pitzer Jacob",
+  "author": {
+    "name": "Luiz Felipe Pitzer",
+    "url": "https://lfp.app.br"
+  },
   "license": "MIT",
   "homepage": "https://github.com/crie-studio/inpromptu",
   "repository": {
@@ -48,7 +51,7 @@
   "build": {
     "appId": "br.app.lfp.inpromptu",
     "productName": "InPromptu",
-    "copyright": "Copyright © 2026 Luiz Felipe Pitzer Jacob",
+    "copyright": "Copyright © 2026 Luiz Felipe Pitzer - https://lfp.app.br",
     "directories": {
       "output": "dist",
       "buildResources": "build"

@@ -144,6 +144,10 @@
     .start:active { transform: scale(.98); }
     .start:disabled { opacity: .4; }
     .hint { color: var(--muted); font-size: 13px; text-align: center; margin: 0; }
+    .credit { align-self: center; margin-top: auto; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 12px 0 4px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); font-size: 12.5px; text-decoration: none; }
+    .credit .mono { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--hl), #ff9f0a); color: var(--on-hl); font-size: 9px; font-weight: 800; }
+    .credit i { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); }
+    .credit .site { color: var(--hl); }
 
     /* ── Enviar texto ── */
     #dir { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 4px 12px calc(env(safe-area-inset-bottom) + 12px); width: 100%; max-width: 760px; margin: 0 auto; }
@@ -237,6 +241,7 @@
     </div>
     <button class="start" id="b-start"><svg class="i"><use href="#i-play"/></svg>Iniciar leitura</button>
     <p class="hint" id="idle-hint">A leitura começa no computador, com a contagem regressiva.</p>
+    <a class="credit" href="https://lfp.app.br" target="_blank" rel="noopener"><span class="mono">LF</span>Luiz Felipe Pitzer<i></i><span class="site">lfp.app.br ↗</span></a>
   </section>
 
   <!-- Durante a leitura -->

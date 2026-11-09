@@ -108,7 +108,7 @@
 
   function renderFileName() {
     $('#file-name').textContent = (dirty ? '• ' : '') + fileName;
-    document.title = `${fileName} — InPromptu`;
+    document.title = 'InPromptu - por Luiz Felipe Pitzer';
   }
 
   function markDirty() {
@@ -672,6 +672,7 @@
       api.invoke('app:openExternal', a.dataset.href);
     });
   }
+  api.invoke('app:info').then((info) => { $('#about-version').textContent = `InPromptu ${info.version}`; });
 
   /* ───────────────────────── Remoto ───────────────────────── */
 
