@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob: 'unsafe-eval' 'wasm-unsafe-eval'; worker-src blob:; connect-src 'self' app: blob: data:">
+  <title>InPromptu — motor de voz</title>
+</head>
+<body>
+  <script src="../node_modules/vosk-browser/dist/vosk.js"></script>
+  <script src="vendor/ort/ort.wasm.min.js"></script>
+  <script src="engine.js"></script>
+</body>
+</html>

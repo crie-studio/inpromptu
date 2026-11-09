@@ -1,0 +1,141 @@
+# Gera o instalador a partir de uma tag (ex.: v2.0.0) e cria um rascunho de release no GitHub.
+# Com o SignPath configurado (variáveis SIGNPATH_* e o segredo SIGNPATH_API_TOKEN), o InPromptu.exe e
+# o instalador são assinados — cada assinatura espera a aprovação manual no SignPath.
+# Sem o SignPath configurado, o instalador sai sem assinatura. Passo a passo em docs/ASSINATURA.md.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      SIGN: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Conferir a versão da tag
+        shell: pwsh
+        run: |
+          $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ("v$v" -ne "${{ github.ref_name }}") { throw "A tag ${{ github.ref_name }} não bate com a versão $v do package.json." }
+          "VERSION=$v" >> $env:GITHUB_ENV
+
+      - name: Testes
+        run: npm test
+
+      - name: Empacotar o app
+        run: npx electron-builder --win --dir --x64 --publish never
+
+      # 1ª assinatura: o InPromptu.exe, antes de ir para dentro do instalador.
+      - name: Enviar o app para assinatura
+        if: env.SIGN == 'true'
+        id: upload-app
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-unsigned
+          path: dist/win-unpacked/
+          retention-days: 1
+
+      - name: Assinar o app (SignPath)
+        if: env.SIGN == 'true'
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: app
+          github-artifact-id: ${{ steps.upload-app.outputs.artifact-id }}
+          parameters: |
+            version: "${{ env.VERSION }}"
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 7200
+          output-artifact-directory: dist/app-signed
+
+      - name: Gerar o instalador
+        shell: pwsh
+        run: |
+          $app = if ($env:SIGN -eq 'true') { 'dist/app-signed' } else { 'dist/win-unpacked' }
+          npx electron-builder --win nsis --x64 --prepackaged $app --publish never
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force dist/installer | Out-Null
+          Copy-Item "dist/InPromptu-Setup-$env:VERSION.exe" dist/installer/InPromptu-Setup.exe
+
+      # 2ª assinatura: o instalador.
+      - name: Enviar o instalador para assinatura
+        if: env.SIGN == 'true'
+        id: upload-installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: installer-unsigned
+          path: dist/installer/InPromptu-Setup.exe
+          retention-days: 1
+
+      - name: Assinar o instalador (SignPath)
+        if: env.SIGN == 'true'
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.upload-installer.outputs.artifact-id }}
+          parameters: |
+            version: "${{ env.VERSION }}"
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 7200
+          output-artifact-directory: dist/installer-signed
+
+      - name: Preparar os arquivos da release
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force release | Out-Null
+          $src = if ($env:SIGN -eq 'true') { 'dist/installer-signed/InPromptu-Setup.exe' } else { 'dist/installer/InPromptu-Setup.exe' }
+          $name = "InPromptu-Setup-$env:VERSION.exe"
+          Copy-Item $src "release/$name"
+          $hash = (Get-FileHash "release/$name" -Algorithm SHA256).Hash.ToLower()
+          "$hash  $name" | Set-Content release/SHA256SUMS.txt -Encoding ascii
+
+          # Notas: a seção desta versão no CHANGELOG.md + instruções de download.
+          $log = Get-Content CHANGELOG.md -Raw
+          $m = [regex]::Match($log, "(?ms)^## \[?$([regex]::Escape($env:VERSION))\]?[^\n]*\n(.*?)(?=^## |\z)")
+          $changes = if ($m.Success) { $m.Groups[1].Value.Trim() } else { '' }
+          $signed = if ($env:SIGN -eq 'true') {
+            'O instalador e o app são assinados digitalmente ([Code signing policy](CODE_SIGNING_POLICY_URL)).'
+          } else {
+            'Esta versão ainda não é assinada digitalmente: se o Windows mostrar "O Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo**. ([Code signing policy](CODE_SIGNING_POLICY_URL))'
+          }
+          $signed = $signed.Replace('CODE_SIGNING_POLICY_URL', "${{ github.server_url }}/${{ github.repository }}/blob/main/CODE_SIGNING_POLICY.md")
+          @"
+          ## Baixar
+
+          Baixe **$name** abaixo e abra para instalar (Windows 10 ou 11, 64 bits).
+
+          $signed
+
+          $changes
+          "@ | Set-Content release/NOTES.md -Encoding utf8
+
+      - name: Criar o rascunho da release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" "release/InPromptu-Setup-$env:VERSION.exe" release/SHA256SUMS.txt `
+            --draft --title "InPromptu $env:VERSION" --notes-file release/NOTES.md

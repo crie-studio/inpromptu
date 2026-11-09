@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+  <title>InPromptu — Teleprompter</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+  <div id="root">
+    <div id="island">
+      <video id="cam" autoplay muted playsinline hidden></video>
+      <div id="viewport"><div id="text"></div></div>
+      <div id="marker" hidden><div class="col"></div></div>
+      <div id="banner" hidden></div>
+      <div id="bar">
+        <canvas id="wave" width="88" height="40"></canvas>
+        <span id="status"></span>
+        <div id="progress"><div id="progress-fill"></div></div>
+        <span id="page"></span>
+        <span id="timer"></span>
+        <div class="buttons">
+          <button id="b-prev" title="Página anterior (Ctrl+Alt+PageUp)">
+            <svg viewBox="0 0 24 24"><path d="M6 5v14M19 5 9 12l10 7z"/></svg>
+          </button>
+          <button id="b-play" title="Pausar / retomar (Ctrl+Alt+P)">
+            <svg class="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>
+            <svg class="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15L19.5 12z"/></svg>
+          </button>
+          <button id="b-next" title="Próxima página (Ctrl+Alt+PageDown)">
+            <svg viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z"/></svg>
+          </button>
+          <button id="b-mute" title="Microfone (Ctrl+Alt+M)">
+            <svg class="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+            <svg class="i-mic-off" viewBox="0 0 24 24"><path d="M15 9.5V6a3 3 0 0 0-5.7-1.3M9 9v2a3 3 0 0 0 4.6 2.5M18.5 11a6.5 6.5 0 0 1-1 3.4M5.5 11a6.5 6.5 0 0 0 10.2 5.3M12 17.5V21M3 3l18 18"/></svg>
+          </button>
+          <button id="b-stop" title="Parar (Ctrl+Alt+S)">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="shared/text.js"></script>
+  <script src="overlay.js"></script>
+</body>
+</html>

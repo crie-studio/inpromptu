@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+  <title>InPromptu</title>
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="../assets/icon.png" alt="">
+      <span>InPromptu</span>
+    </div>
+    <div class="file-actions">
+      <button id="f-new" class="ghost" title="Novo (Ctrl+N)">Novo</button>
+      <button id="f-open" class="ghost" title="Abrir .inpromptu, .txt, .md ou .pptx (Ctrl+O)">Abrir</button>
+      <button id="f-save" class="ghost" title="Salvar (Ctrl+S)">Salvar</button>
+      <span id="file-name" class="file-name">Sem título</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="seg compact" data-key="mode" title="Modo de guia">
+      <button data-value="tracking">Voz</button>
+      <button data-value="classic">Clássico</button>
+      <button data-value="voice">Ativado por voz</button>
+    </div>
+    <div class="seg compact" data-key="overlay" title="Onde o texto aparece">
+      <button data-value="notch">Ilha</button>
+      <button data-value="floating">Flutuante</button>
+      <button data-value="fullscreen">Tela cheia</button>
+    </div>
+    <button id="toggle-panel" class="icon-btn" title="Configurações">
+      <svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+    </button>
+    <button id="start" class="primary" title="Iniciar / parar (Ctrl+Enter · global: Ctrl+Alt+P)">
+      <svg class="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15L19.5 12z"/></svg>
+      <svg class="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+      <span>Iniciar</span>
+    </button>
+  </header>
+
+  <main>
+    <aside class="pages">
+      <div class="pages-head">
+        <span>Páginas</span>
+        <button id="page-add" class="icon-btn small" title="Nova página">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+      <ol id="page-list"></ol>
+      <p class="pages-hint">Arraste um <b>.pptx</b> para importar as anotações do apresentador como páginas.</p>
+    </aside>
+
+    <section class="editor">
+      <textarea id="script" placeholder="Cole ou escreva seu roteiro aqui…
+
+Dicas:
+[olhe para a câmera] — entre colchetes: nota de direção, que não é lida
+[cena: Câmera 2] — troca de cena no OBS quando a leitura chegar aqui
+# Introdução — linha começando com #: seção (teclas 1 a 9 pulam para ela)" spellcheck="true"></textarea>
+      <footer class="statusbar">
+        <span id="stats"></span>
+        <span id="run-status"></span>
+        <span class="spacer"></span>
+        <span id="engine-status"></span>
+      </footer>
+    </section>
+
+    <aside id="panel" class="panel">
+      <nav class="tabs">
+        <button data-tab="leitura" class="active">Leitura</button>
+        <button data-tab="janela">Janela</button>
+        <button data-tab="aparencia">Visual</button>
+        <button data-tab="telacheia">Tela cheia</button>
+        <button data-tab="remoto">Conexões</button>
+        <button data-tab="atalhos">Mais</button>
+      </nav>
+
+      <div class="tab-body">
+        <!-- Leitura -->
+        <section data-pane="leitura" class="pane active">
+          <h3>Modo de guia</h3>
+          <div class="cards" data-key="mode">
+            <button data-value="tracking">
+              <b>Rastreamento de voz</b>
+              <span>Acompanha o roteiro enquanto você lê: o texto sobe no seu ritmo e para quando você para. Usa o microfone, 100% offline.</span>
+            </button>
+            <button data-value="classic">
+              <b>Clássico</b>
+              <span>Rola em velocidade constante. Não usa o microfone.</span>
+            </button>
+            <button data-value="voice">
+              <b>Ativado por voz</b>
+              <span>Rola na velocidade escolhida enquanto você fala e para no silêncio. Bom para improvisar fora do roteiro.</span>
+            </button>
+          </div>
+
+          <div class="field" data-show-if="mode=tracking">
+            <label for="language">Idioma da fala</label>
+            <select id="language" data-key="language"></select>
+            <div id="model-box" class="model-box">
+              <span id="model-text"></span>
+              <button id="model-download" class="small">Baixar</button>
+              <div class="meter" hidden><div></div></div>
+            </div>
+          </div>
+
+          <div class="field" data-show-if="mode!=classic">
+            <label for="mic">Microfone</label>
+            <select id="mic" data-key="micDeviceId"></select>
+          </div>
+
+          <div class="field" data-show-if="mode!=tracking">
+            <label>Velocidade <output data-for="speed"></output></label>
+            <input type="range" data-key="speed" min="0.5" max="8" step="0.5">
+            <small>Palavras por segundo. Role o mouse sobre o texto para adiantar ou voltar.</small>
+          </div>
+
+          <div class="field" data-show-if="mode!=classic">
+            <label>Sensibilidade do detector de voz <output data-for="voiceSensitivity"></output></label>
+            <input type="range" data-key="voiceSensitivity" min="0" max="100" step="5">
+            <small>O detector distingue voz de ruído e decide quando o texto anda. Se ele andar com outras vozes ou barulho, diminua; se não andar quando você fala baixo, aumente. As ondinhas na barra ficam coloridas quando ele ouve você.</small>
+          </div>
+
+          <label class="toggle">
+            <input type="checkbox" data-key="autoAdvance">
+            <span>Avançar para a próxima página automaticamente</span>
+          </label>
+
+          <h3>Antes e durante a leitura</h3>
+          <div class="field">
+            <label>Contagem antes de começar</label>
+            <div class="seg" data-key="countdown">
+              <button data-value="0">Não</button>
+              <button data-value="3">3 s</button>
+              <button data-value="5">5 s</button>
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" data-key="showTimer">
+            <span>Mostrar cronômetro e tempo restante <small>O tempo restante usa o seu ritmo de leitura.</small></span>
+          </label>
+          <div class="field inline" data-show-if="showTimer=true">
+            <label for="target-min">Meta de duração (min; 0 = sem meta)</label>
+            <input id="target-min" class="narrow" type="number" data-key="targetMinutes" min="0" max="180" step="0.5">
+          </div>
+
+          <h3>Legendas</h3>
+          <label class="toggle">
+            <input type="checkbox" data-key="subtitles">
+            <span>Gerar legendas .srt ao terminar <small>No rastreamento de voz, com o instante em que cada palavra foi dita. Se o OBS gravou, ficam ao lado do vídeo e com o mesmo nome; senão, em Documentos\InPromptu\Legendas.</small></span>
+          </label>
+          <div class="rec-row">
+            <button id="subs-open" class="small ghost">Abrir pasta das legendas</button>
+            <button id="subs-show" class="small ghost" hidden>Mostrar a última</button>
+          </div>
+          <small id="subs-status" class="rec-status"></small>
+
+          <h3>Amostra de voz</h3>
+          <p class="note">Grave 1 a 2 minutos lendo em voz alta o roteiro aberto aqui no editor, no seu ritmo normal. A gravação fica só no seu computador e serve para ajustar o reconhecimento à sua voz.</p>
+          <div class="rec-row">
+            <button id="rec-btn" class="small">● Gravar amostra</button>
+            <button id="rec-open" class="small ghost">Abrir pasta das gravações</button>
+          </div>
+          <small id="rec-status" class="rec-status"></small>
+        </section>
+
+        <!-- Janela -->
+        <section data-pane="janela" class="pane">
+          <h3>Onde o texto aparece</h3>
+          <div class="cards" data-key="overlay">
+            <button data-value="notch">
+              <b>Ilha no topo</b>
+              <span>Fica colada no topo da tela, logo abaixo da webcam — seus olhos parecem olhar para a câmera.</span>
+            </button>
+            <button data-value="floating">
+              <b>Janela flutuante</b>
+              <span>Sempre visível por cima dos outros apps. Arraste pela barra inferior.</span>
+            </button>
+            <button data-value="fullscreen">
+              <b>Tela cheia</b>
+              <span>Teleprompter em tela cheia em qualquer monitor (ideal para monitor externo ou espelho). Esc para sair.</span>
+            </button>
+          </div>
+
+          <div data-show-if="overlay=notch">
+            <label class="toggle">
+              <input type="checkbox" data-key="followMouse">
+              <span>Acompanhar o monitor onde está o mouse</span>
+            </label>
+            <div class="field" data-show-if="followMouse=false">
+              <label for="display">Monitor</label>
+              <select id="display" data-key="displayId" data-type="number"></select>
+            </div>
+          </div>
+
+          <div data-show-if="overlay=floating">
+            <label class="toggle">
+              <input type="checkbox" data-key="followCursor">
+              <span>Seguir o cursor <small>(a janela fica transparente a cliques; use os atalhos)</small></span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" data-key="glass">
+              <span>Efeito vidro (acrílico do Windows 11)</span>
+            </label>
+            <div class="field" data-show-if="glass=true">
+              <label>Escurecer o fundo <output data-for="glassOpacity" data-suffix="%"></output></label>
+              <input type="range" data-key="glassOpacity" min="0" max="60" step="5">
+            </div>
+          </div>
+
+          <p class="note" data-show-if="overlay=fullscreen">Monitor, layout do texto, transparência e câmera: aba <b>Tela cheia</b>.</p>
+
+          <h3>Privacidade</h3>
+          <label class="toggle">
+            <input type="checkbox" data-key="hideFromCapture">
+            <span>Esconder de gravações e compartilhamento de tela <small>(Teams, Zoom, Meet, OBS…)</small></span>
+          </label>
+        </section>
+
+        <!-- Aparência -->
+        <section data-pane="aparencia" class="pane">
+          <div class="preview-wrap">
+            <div id="preview" class="preview">
+              <div class="pv-text"></div>
+              <div class="pv-bar"><i></i><i></i><i></i><i></i><i></i><span></span></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Largura <output data-for="width" data-suffix=" px"></output></label>
+            <input type="range" data-key="width" min="280" max="500" step="10">
+          </div>
+          <div class="field">
+            <label>Altura do texto <output data-for="height" data-suffix=" px"></output></label>
+            <input type="range" data-key="height" min="100" max="400" step="10">
+          </div>
+          <div class="field">
+            <label>Fonte</label>
+            <div class="seg" data-key="fontFamily">
+              <button data-value="sans">Sans</button>
+              <button data-value="serif" style="font-family: Georgia, serif">Serif</button>
+              <button data-value="mono" style="font-family: 'Cascadia Mono', Consolas, monospace">Mono</button>
+              <button data-value="dyslexic" style="font-family: OpenDyslexic, sans-serif">Dislexia</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Tamanho</label>
+            <div class="seg" data-key="fontSize">
+              <button data-value="xs">PP</button>
+              <button data-value="sm">P</button>
+              <button data-value="lg">G</button>
+              <button data-value="xl">GG</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Cor do destaque</label>
+            <div class="swatches" data-key="highlight">
+              <button data-value="white" style="--c:#ffffff" title="Branco"></button>
+              <button data-value="yellow" style="--c:#ffd60a" title="Amarelo"></button>
+              <button data-value="green" style="--c:#30d158" title="Verde"></button>
+              <button data-value="blue" style="--c:#64d2ff" title="Azul"></button>
+              <button data-value="pink" style="--c:#ff6fae" title="Rosa"></button>
+              <button data-value="orange" style="--c:#ff9f0a" title="Laranja"></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tela cheia -->
+        <section data-pane="telacheia" class="pane">
+          <div class="fs-preview-wrap">
+            <div id="fs-preview" class="fs-preview">
+              <div class="fsp-inner">
+                <div class="fsp-cam"></div>
+                <div class="fsp-bg"></div>
+                <div class="fsp-view"><div class="fsp-text"></div></div>
+                <div class="fsp-marker"><div class="col"></div></div>
+                <div class="fsp-bar"><span></span></div>
+              </div>
+            </div>
+          </div>
+          <p class="note center" data-show-if="overlay!=fullscreen">
+            Estas opções valem para o modo Tela cheia.
+            <button id="use-fullscreen" class="small">Usar tela cheia</button>
+          </p>
+
+          <h3>Monitor</h3>
+          <div class="field">
+            <label for="fs-display">Monitor</label>
+            <select id="fs-display" data-key="fullscreenDisplayId" data-type="number"></select>
+          </div>
+          <div class="field">
+            <label>Espelhar (para teleprompter com vidro)</label>
+            <div class="seg" data-key="mirror">
+              <button data-value="none">Não</button>
+              <button data-value="horizontal">Horizontal</button>
+              <button data-value="vertical">Vertical</button>
+              <button data-value="both">Ambos</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Girar (monitor em pé)</label>
+            <div class="seg" data-key="fsRotate">
+              <button data-value="none">Não</button>
+              <button data-value="left">90° ↺</button>
+              <button data-value="right">90° ↻</button>
+            </div>
+          </div>
+
+          <h3>Texto</h3>
+          <div class="field">
+            <label>Tamanho <output data-for="fsFontSize" data-suffix=" px"></output></label>
+            <input type="range" data-key="fsFontSize" min="24" max="180" step="2">
+          </div>
+          <div class="field">
+            <label>Alinhamento</label>
+            <div class="seg" data-key="fsAlign">
+              <button data-value="left">Esquerda</button>
+              <button data-value="center">Centro</button>
+              <button data-value="justify">Justificado</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Largura da coluna <output data-for="fsColumn" data-suffix="%"></output></label>
+            <input type="range" data-key="fsColumn" min="30" max="100" step="5">
+            <small>Coluna estreita e centralizada: os olhos andam menos e você parece olhar para a câmera.</small>
+          </div>
+          <div class="field">
+            <label>Espaço entre linhas <output data-for="fsLineHeight"></output></label>
+            <input type="range" data-key="fsLineHeight" min="1" max="2.4" step="0.05">
+          </div>
+          <div class="field">
+            <label>Espaço entre letras <output data-for="fsLetterSpacing"></output></label>
+            <input type="range" data-key="fsLetterSpacing" min="0" max="20" step="1">
+          </div>
+          <div class="field">
+            <label>Peso</label>
+            <div class="seg" data-key="fsWeight">
+              <button data-value="normal" style="font-weight: 400">Normal</button>
+              <button data-value="medium" style="font-weight: 500">Médio</button>
+              <button data-value="bold" style="font-weight: 700">Negrito</button>
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" data-key="fsUppercase">
+            <span>TUDO EM MAIÚSCULAS</span>
+          </label>
+          <div class="field inline">
+            <label for="fs-text-color">Cor do texto</label>
+            <input id="fs-text-color" type="color" data-key="fsTextColor">
+          </div>
+          <div class="field">
+            <label>Contorno do texto <output data-for="fsOutline" data-suffix=" px"></output></label>
+            <input type="range" data-key="fsOutline" min="0" max="8" step="1">
+            <small>Ajuda a ler sobre a câmera ou sobre outros programas.</small>
+          </div>
+
+          <h3>Linha de leitura</h3>
+          <div class="field">
+            <label>Posição <output data-for="fsAnchor" data-suffix="% da altura"></output></label>
+            <input type="range" data-key="fsAnchor" min="10" max="70" step="5">
+          </div>
+          <div class="field">
+            <label>Marcador</label>
+            <div class="seg" data-key="fsMarker">
+              <button data-value="none">Nenhum</button>
+              <button data-value="arrow">Seta</button>
+              <button data-value="band">Faixa</button>
+            </div>
+          </div>
+
+          <h3>Fundo e transparência</h3>
+          <div class="field inline">
+            <label for="fs-bg-color">Cor do fundo</label>
+            <input id="fs-bg-color" type="color" data-key="fsBgColor">
+          </div>
+          <div class="field">
+            <label>Opacidade do fundo <output data-for="fsBgOpacity" data-suffix="%"></output></label>
+            <input type="range" data-key="fsBgOpacity" min="0" max="100" step="5">
+            <small>Abaixo de 100% você vê o que está atrás — por exemplo, o projetor ou a prévia do OBS.</small>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" data-key="fsClickThrough">
+            <span>Cliques atravessam para o programa de baixo <small>A barra de controles continua clicável. Liga/desliga a qualquer momento com <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>.</small></span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" data-key="fsShowBar">
+            <span>Mostrar a barra de controles <small>Desligado, ela aparece quando o mouse passa por ela.</small></span>
+          </label>
+
+          <h3>Câmera</h3>
+          <div class="field">
+            <label for="cam-device">Mostrar câmera</label>
+            <select id="cam-device" data-key="camDeviceId"></select>
+            <small>Para se ver com a cena e os filtros do OBS: no OBS, clique em <b>Iniciar câmera virtual</b> e escolha <b>OBS Virtual Camera</b> aqui.</small>
+          </div>
+          <div data-show-if="camDeviceId!=">
+            <div class="field">
+              <label>Onde</label>
+              <div class="seg" data-key="camMode">
+                <button data-value="background">Fundo da tela</button>
+                <button data-value="corner">Janelinha no canto</button>
+              </div>
+            </div>
+            <div class="field" data-show-if="camMode=background">
+              <label>Escurecer a câmera <output data-for="camDim" data-suffix="%"></output></label>
+              <input type="range" data-key="camDim" min="0" max="90" step="5">
+            </div>
+            <label class="toggle">
+              <input type="checkbox" data-key="camMirror">
+              <span>Espelhar a câmera (como selfie)</span>
+            </label>
+          </div>
+
+          <h3>Segunda tela (para quem apresenta)</h3>
+          <label class="toggle">
+            <input type="checkbox" data-key="extraOutput">
+            <span>Mostrar também em outro monitor <small>Uma tela cheia extra que acompanha a leitura, com este mesmo layout — por exemplo, o monitor do vidro do teleprompter. Funciona com qualquer tipo de janela (ilha, flutuante ou tela cheia).</small></span>
+          </label>
+          <div data-show-if="extraOutput=true">
+            <div class="field">
+              <label for="extra-display">Monitor</label>
+              <select id="extra-display" data-key="extraDisplayId" data-type="number"></select>
+            </div>
+            <div class="field">
+              <label>Espelhar</label>
+              <div class="seg" data-key="extraMirror">
+                <button data-value="none">Não</button>
+                <button data-value="horizontal">Horizontal</button>
+                <button data-value="vertical">Vertical</button>
+                <button data-value="both">Ambos</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Remoto -->
+        <section data-pane="remoto" class="pane">
+          <h3>Celular (rede local)</h3>
+          <p class="note">Acompanhe e controle a leitura pelo celular ou tablet, sem instalar nada. O celular mostra o texto e tem todos os controles: pausar, linhas, páginas, seções, velocidade e microfone. A aba <b>Enviar texto</b> permite escrever e mandar um roteiro.</p>
+          <label class="toggle">
+            <input type="checkbox" data-key="remoteEnabled">
+            <span>Ativar conexão remota</span>
+          </label>
+          <div class="field">
+            <label for="remote-port">Porta</label>
+            <input id="remote-port" type="number" data-key="remotePort" min="1024" max="65535">
+          </div>
+          <div id="remote-box" class="remote-box" hidden>
+            <img id="remote-qr" alt="QR code da conexão remota">
+            <div>
+              <code id="remote-url"></code>
+              <div class="row">
+                <button id="remote-copy" class="small">Copiar link</button>
+                <button id="remote-renew" class="small ghost">Gerar novo link</button>
+              </div>
+              <small id="remote-clients"></small>
+            </div>
+          </div>
+          <p id="remote-error" class="note error" hidden></p>
+          <p class="note">O celular precisa estar na mesma rede Wi-Fi. Na primeira vez, o Windows pode pedir para liberar o app no firewall (marque <b>Redes privadas</b>). O tráfego não é criptografado — use só em redes confiáveis.</p>
+
+          <h3>OBS Studio</h3>
+          <p class="note">Grava no OBS junto com a leitura, troca de cena quando a leitura passa por <code>[cena: Nome da cena]</code> no roteiro e marca capítulos. No OBS: <b>Ferramentas → Configurações do servidor WebSocket</b> → marque <b>Ativar servidor WebSocket</b>; a senha aparece em <b>Mostrar informações de conexão</b>.</p>
+          <label class="toggle">
+            <input type="checkbox" data-key="obsEnabled">
+            <span>Conectar ao OBS</span>
+          </label>
+          <div data-show-if="obsEnabled=true">
+            <div class="obs-row">
+              <div class="field">
+                <label for="obs-host">Endereço</label>
+                <input id="obs-host" type="text" data-key="obsHost" spellcheck="false">
+              </div>
+              <div class="field">
+                <label for="obs-port">Porta</label>
+                <input id="obs-port" type="number" data-key="obsPort" min="1" max="65535">
+              </div>
+            </div>
+            <div class="field">
+              <label for="obs-pass">Senha do servidor WebSocket</label>
+              <div class="rec-row">
+                <input id="obs-pass" type="password" autocomplete="off" placeholder="digite e clique em Salvar">
+                <button id="obs-pass-save" class="small">Salvar</button>
+              </div>
+              <small id="obs-pass-note"></small>
+            </div>
+            <div class="obs-state-row">
+              <span id="obs-state" class="obs-state"></span>
+              <button id="obs-retry" class="small ghost">Conectar de novo</button>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" data-key="obsRecord">
+              <span>Começar a gravar com a leitura e parar no fim <small>Se o OBS já estiver gravando, ele continua e o InPromptu não para a gravação.</small></span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" data-key="obsChapters">
+              <span>Marcar um capítulo a cada página <small>Precisa do OBS 30.2 ou mais novo, gravando em MP4 híbrido.</small></span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Atalhos -->
+        <section data-pane="atalhos" class="pane">
+          <h3>Atalhos globais</h3>
+          <p class="note">Funcionam mesmo com outro app em primeiro plano.</p>
+          <table id="shortcut-table" class="shortcuts"></table>
+          <h3>Na sobreposição</h3>
+          <table class="shortcuts">
+            <tr><td>Clique numa palavra</td><td>Continuar a partir dela</td></tr>
+            <tr><td>Rolar o mouse</td><td>Adiantar / voltar linhas</td></tr>
+            <tr><td><kbd>1</kbd> a <kbd>9</kbd></td><td>Pular para a seção (linhas com #) — janela flutuante e tela cheia</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>Parar (tela cheia)</td></tr>
+          </table>
+          <h3>No editor</h3>
+          <table class="shortcuts">
+            <tr><td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td><td>Iniciar / parar</td></tr>
+            <tr><td><kbd>Ctrl</kbd> + <kbd>S</kbd></td><td>Salvar</td></tr>
+            <tr><td><kbd>Ctrl</kbd> + <kbd>O</kbd></td><td>Abrir</td></tr>
+          </table>
+        </section>
+
+        <!-- Sobre -->
+        <section data-pane="atalhos" class="pane">
+          <h3>InPromptu</h3>
+          <p class="note">O teleprompter que acompanha a sua voz. Gratuito e de código aberto (licença MIT).</p>
+          <p class="note">O reconhecimento de voz roda no seu computador com o <a href="#" data-href="https://alphacephei.com/vosk/">Vosk</a> (Apache 2.0). Nenhum áudio sai da sua máquina. O modelo de cada idioma é baixado uma única vez.</p>
+          <p class="note">Formatos: <b>.inpromptu</b> (páginas; também abre os antigos <b>.roteiro</b>), <b>.txt</b>/<b>.md</b> (separe páginas com uma linha <code>---</code>) e <b>.pptx</b> (anotações do apresentador).</p>
+          <p class="note">No texto: <code>[nota]</code> entre colchetes aparece em outra cor e não é lida; <code>[cena: Nome]</code> troca de cena no OBS e <code>[capítulo: Nome]</code> marca um capítulo quando a leitura passa por ali; uma linha começando com <code>#</code> vira uma seção, para pular direto com as teclas 1 a 9 ou pelo celular.</p>
+          <p class="note">Créditos: Vosk e vosk-browser (Apache 2.0), Silero VAD e ONNX Runtime (MIT), fonte OpenDyslexic (SIL OFL). A ideia da faixa no topo da tela, perto da câmera, veio do <a href="#" data-href="https://github.com/f/textream">Textream</a>, de Fatih Kadir Akın.</p>
+        </section>
+      </div>
+    </aside>
+  </main>
+
+  <div id="drop" hidden><div>Solte para abrir</div></div>
+  <div id="toast" hidden></div>
+
+  <script src="shared/text.js"></script>
+  <script src="editor.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Dependências e saídas de build
+node_modules/
+dist/
+
+# Gerado por "npm install" (scripts/vendor.js)
+renderer/vendor/
+
+# Sistema e editores
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+*.log

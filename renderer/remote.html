@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="InPromptu">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <link rel="icon" href="/icon.png">
+  <title>InPromptu — Controle</title>
+  <style>
+    :root {
+      --bg: #000; --surface: #111115; --surface-2: #1c1c22; --surface-3: #2a2a32; --line: #24242b;
+      --text: #f5f5f7; --muted: #8e8e98; --hl: #ffd60a; --on-hl: #161200;
+      --ok: #30d158; --danger: #ff453a; --warn: #ff9f0a; --note: #7dd3fc;
+      --fs: 28px; --r: 18px;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
+    body {
+      display: flex; flex-direction: column; height: 100dvh;
+      font: 15px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-user-select: none; user-select: none; touch-action: manipulation;
+      padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+    }
+    button { font: inherit; color: inherit; cursor: pointer; }
+    svg.i { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+    /* ── Topo ── */
+    .top { display: flex; align-items: center; gap: 10px; padding: calc(env(safe-area-inset-top) + 10px) 14px 10px; }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; margin-right: auto; min-width: 0; }
+    .brand img { width: 26px; height: 26px; border-radius: 7px; }
+    .tabs { display: flex; background: var(--surface-2); border-radius: 11px; padding: 3px; }
+    .tabs button { border: 0; background: none; color: var(--muted); font-size: 13px; font-weight: 600; padding: 7px 12px; border-radius: 8px; }
+    .tabs button.active { background: var(--surface-3); color: var(--text); }
+    .conn { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 3px rgba(255, 69, 58, .22); flex: none; }
+    .conn.on { background: var(--ok); box-shadow: 0 0 0 3px rgba(48, 209, 88, .2); }
+    .offline-bar { margin: 0 12px 8px; padding: 8px 12px; border-radius: 12px; background: rgba(255, 69, 58, .14); color: #ff9b94; font-size: 13px; text-align: center; }
+
+    /* ── Controle ── */
+    #control { flex: 1; min-height: 0; display: flex; flex-direction: column; width: 100%; max-width: 760px; margin: 0 auto; }
+    .status { display: flex; align-items: center; gap: 10px; padding: 2px 16px 10px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .chip { padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; background: var(--surface-2); color: var(--text); }
+    .chip.live { background: rgba(48, 209, 88, .16); color: var(--ok); }
+    .chip.paused { background: rgba(255, 214, 10, .14); color: var(--hl); }
+    .chip.counting { background: var(--hl); color: var(--on-hl); }
+    #timer { margin-left: auto; overflow: hidden; text-overflow: ellipsis; }
+    #timer b { font-weight: 400; }
+    #timer.over, #timer.over b { color: var(--warn); }
+
+    #prompt { position: relative; flex: 1; min-height: 120px; margin: 0 12px; border-radius: var(--r); background: var(--surface); overflow: hidden; }
+    #stage { position: absolute; inset: 0; padding: 0 18px;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 78%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 78%, transparent 100%); }
+    body.mirror #stage { transform: scaleX(-1); }
+    #text { font-size: var(--fs); line-height: 1.4; font-weight: 600; color: rgba(255, 255, 255, .92); transition: transform .38s cubic-bezier(.2, .7, .2, 1); padding-top: 4px; }
+    #text .read { color: var(--hl); opacity: .5; }
+    #text .cur { color: var(--hl); text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: .2em; }
+    #text .gap { display: block; height: .5em; }
+    #text .note { color: var(--note); font-style: italic; font-weight: 400; font-size: .78em; }
+    #text .heading { color: var(--hl); font-weight: 700; font-size: .62em; letter-spacing: .08em; text-transform: uppercase; }
+    #text .note.read, #text .heading.read { opacity: .4; }
+    .bars { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 2px; }
+    .bar { height: 3px; background: rgba(255, 255, 255, .06); }
+    .bar div { height: 100%; width: 0; background: var(--hl); transition: width .3s; }
+    #level div { background: var(--ok); transition: width .1s; }
+    body.mode-classic #level { visibility: hidden; }
+    #countdown { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; background: rgba(17, 17, 21, .86); gap: 4px; }
+    #countdown b { font-size: 88px; line-height: 1; color: var(--hl); font-variant-numeric: tabular-nums; }
+    #countdown span { color: var(--muted); font-weight: 600; }
+
+    #sections { display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px 0; scrollbar-width: none; flex: none; }
+    #sections::-webkit-scrollbar { display: none; }
+    #sections button { flex: none; border: 1px solid transparent; background: var(--surface-2); color: var(--text); border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 600; white-space: nowrap; max-width: 70vw; overflow: hidden; text-overflow: ellipsis; }
+    #sections button.current { border-color: var(--hl); color: var(--hl); }
+    #sections button span { color: var(--muted); margin-right: 6px; font-variant-numeric: tabular-nums; }
+
+    #deck { display: grid; gap: 10px; padding: 12px 12px calc(env(safe-area-inset-bottom) + 12px); flex: none; }
+    .nav { display: grid; grid-template-columns: 1fr 1fr 1.4fr 1fr 1fr; gap: 8px; }
+    .btn, .tool { border: 0; border-radius: var(--r); background: var(--surface-2); color: var(--text);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+      font-size: 11px; font-weight: 600; transition: transform .08s, background .15s; min-width: 0; }
+    .btn { height: 76px; }
+    .btn span, .tool span { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding: 0 2px; }
+    .btn:active, .tool:active { transform: scale(.95); background: var(--surface-3); }
+    .btn.primary { background: var(--hl); color: var(--on-hl); }
+    .btn.primary span { color: var(--on-hl); opacity: .75; }
+    .btn.primary svg.i { width: 34px; height: 34px; }
+    .btn.primary .i-play { fill: currentColor; }
+    .btn:disabled, .tool:disabled { opacity: .35; }
+    #b-play .i-pause { display: none; }
+    body.running:not(.paused) #b-play .i-pause { display: block; }
+    body.running:not(.paused) #b-play .i-play { display: none; }
+
+    .speed { display: flex; align-items: center; gap: 8px; background: var(--surface); border-radius: var(--r); padding: 6px 6px 6px 16px; min-height: 56px; }
+    .speed .label { flex: 1; font-size: 13px; color: var(--muted); }
+    .speed .label b { display: block; color: var(--text); font-size: 17px; font-variant-numeric: tabular-nums; }
+    .speed button { width: 52px; height: 44px; border: 0; border-radius: 12px; background: var(--surface-2); font-size: 24px; font-weight: 500; display: grid; place-items: center; }
+    .speed button:active { background: var(--surface-3); }
+    body.mode-tracking .speed button { display: none; }
+
+    .tools { display: flex; gap: 8px; }
+    .tool { flex: 1; height: 60px; }
+    .tool svg.i { width: 22px; height: 22px; }
+    .tool.danger { color: var(--danger); }
+    .tool.armed { background: var(--danger); color: #fff; }
+    .tool.armed span { color: #fff; }
+    .tool[aria-pressed="true"] { background: rgba(255, 69, 58, .16); color: var(--danger); }
+    body.mode-classic #b-mute { display: none; }
+    #b-mute .i-mic-off { display: none; }
+    #b-mute[aria-pressed="true"] .i-mic-off { display: block; }
+    #b-mute[aria-pressed="true"] .i-mic { display: none; }
+
+    /* Só controles: esconde o texto, mostra o tempo em destaque e aumenta os botões. */
+    body.compact #prompt { display: none; }
+    body.compact .status { flex: 1; flex-direction: column; justify-content: center; gap: 10px; font-size: 16px; }
+    body.compact #timer { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    body.compact #timer b { font-size: 56px; line-height: 1.05; font-weight: 700; color: var(--text); }
+    body.compact #timer.over b { color: var(--warn); }
+    body.compact .sep { display: none; }
+    body.compact .btn { height: 104px; }
+    body.compact .tool { height: 72px; }
+
+    /* ── Antes de começar ── */
+    #idle { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 12px calc(env(safe-area-inset-bottom) + 16px); display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 760px; margin: 0 auto; }
+    .card { background: var(--surface); border-radius: var(--r); padding: 16px; }
+    .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .card h2 { margin: 6px 0 2px; font-size: 21px; line-height: 1.25; overflow-wrap: anywhere; }
+    .meta { color: var(--muted); font-size: 14px; }
+    .preview { margin: 12px 0 0; color: rgba(255, 255, 255, .78); font-size: 15px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--surface); padding: 5px; border-radius: var(--r); }
+    .seg button { border: 0; background: none; border-radius: 13px; padding: 10px 6px; text-align: center; color: var(--muted); }
+    .seg button b { display: block; color: var(--text); font-size: 14px; }
+    .seg button small { font-size: 11px; }
+    .seg button.active { background: var(--surface-3); }
+    .seg button.active b { color: var(--hl); }
+    .start { height: 64px; border: 0; border-radius: var(--r); background: var(--hl); color: var(--on-hl); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .start svg.i { fill: currentColor; }
+    .start:active { transform: scale(.98); }
+    .start:disabled { opacity: .4; }
+    .hint { color: var(--muted); font-size: 13px; text-align: center; margin: 0; }
+
+    /* ── Enviar texto ── */
+    #dir { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 4px 12px calc(env(safe-area-inset-bottom) + 12px); width: 100%; max-width: 760px; margin: 0 auto; }
+    #dir textarea { flex: 1; width: 100%; resize: none; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; font: 17px/1.5 system-ui, -apple-system, sans-serif; -webkit-user-select: text; user-select: text; }
+    #dir textarea:focus { outline: none; border-color: var(--surface-3); }
+    #dir .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    #dir .row button { height: 52px; border: 0; border-radius: 14px; font-weight: 700; background: var(--surface-2); }
+    #dir .row button.go { background: var(--hl); color: var(--on-hl); }
+    #dir .row button:disabled { opacity: .4; }
+    #dir small { color: var(--muted); font-size: 12px; }
+
+    body.idle #control, body:not(.idle) #idle { display: none; }
+    body.tab-dir #control, body.tab-dir #idle { display: none; }
+    body:not(.tab-dir) #dir { display: none; }
+    body.offline #deck button, body.offline #idle button, body.offline #dir .row button { opacity: .35; pointer-events: none; }
+
+    /* ── Painel de visual ── */
+    .sheet { position: fixed; inset: 0; background: rgba(0, 0, 0, .55); display: flex; align-items: flex-end; justify-content: center; z-index: 10; }
+    .sheet-card { width: 100%; max-width: 520px; background: #17171c; border-radius: 22px 22px 0 0; padding: 18px 16px calc(env(safe-area-inset-bottom) + 16px); display: grid; gap: 6px; }
+    .sheet-card h3 { margin: 0 0 6px; font-size: 17px; }
+    .opt { display: flex; align-items: center; gap: 12px; min-height: 52px; border-bottom: 1px solid var(--line); }
+    .opt:last-of-type { border-bottom: 0; }
+    .opt .t { flex: 1; }
+    .opt .t small { display: block; color: var(--muted); font-size: 12px; }
+    .stepper { display: flex; gap: 6px; }
+    .stepper button { width: 46px; height: 38px; border: 0; border-radius: 10px; background: var(--surface-2); font-weight: 700; }
+    .switch { width: 51px; height: 31px; border-radius: 999px; border: 0; background: var(--surface-3); position: relative; transition: background .2s; flex: none; }
+    .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; transition: transform .2s; }
+    .switch[aria-checked="true"] { background: var(--ok); }
+    .switch[aria-checked="true"]::after { transform: translateX(20px); }
+    .sheet-card .done { margin-top: 8px; height: 50px; border: 0; border-radius: 14px; background: var(--surface-2); font-weight: 700; }
+
+    .toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 62px); transform: translateX(-50%); background: #2c2c34; color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; z-index: 20; pointer-events: none; box-shadow: 0 8px 24px rgba(0, 0, 0, .5); white-space: nowrap; }
+
+    /* Celular deitado: texto à esquerda, botões à direita. */
+    @media (orientation: landscape) and (max-height: 560px) {
+      .top { padding-top: 8px; padding-bottom: 6px; }
+      #control { max-width: none; display: grid; grid-template-columns: 1fr minmax(300px, 42%); grid-template-rows: auto 1fr auto;
+        grid-template-areas: "status deck" "prompt deck" "sections deck"; }
+      .status { grid-area: status; }
+      #prompt { grid-area: prompt; margin-right: 0; }
+      #sections { grid-area: sections; padding-bottom: 10px; }
+      #deck { grid-area: deck; align-content: center; overflow-y: auto; padding-top: 0; }
+      .btn { height: 64px; }
+      .tool { height: 52px; }
+      body.compact #control { grid-template-rows: 1fr auto; grid-template-areas: "status deck" "sections deck"; }
+      body.compact #timer b { font-size: 44px; }
+    }
+  </style>
+</head>
+<body class="idle paused offline mode-tracking">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15L19.5 12z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M6 5v14M19 5 9 12l10 7z"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+    <symbol id="i-restart" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+    <symbol id="i-mic-off" viewBox="0 0 24 24"><path d="M15 9.3V6a3 3 0 0 0-5.7-1.3M9 9v2a3 3 0 0 0 4.9 2.3M5 11a7 7 0 0 0 11.4 5.4M19 11a7 7 0 0 1-.7 3M12 18v3M3 3l18 18"/></symbol>
+    <symbol id="i-view" viewBox="0 0 24 24"><path d="M4 7V5h10v2M9 5v14M7 19h4M14 13v-1h6v1M17 12v7M15.5 19h3"/></symbol>
+  </svg>
+
+  <header class="top">
+    <div class="brand"><img src="/icon.png" alt=""><span>InPromptu</span></div>
+    <nav class="tabs" role="tablist">
+      <button class="active" data-tab="control" role="tab">Controle</button>
+      <button data-tab="dir" role="tab">Enviar texto</button>
+    </nav>
+    <span id="conn" class="conn" role="status" aria-label="Sem conexão"></span>
+  </header>
+  <div id="offline" class="offline-bar">Sem conexão com o computador — tentando de novo…</div>
+
+  <!-- Antes de começar -->
+  <section id="idle">
+    <div class="card">
+      <div class="eyebrow">Aberto no computador</div>
+      <h2 id="idle-name">Roteiro</h2>
+      <div class="meta" id="idle-meta"></div>
+      <p class="preview" id="idle-preview"></p>
+    </div>
+    <div>
+      <div class="eyebrow" style="margin: 0 4px 8px">Modo de leitura</div>
+      <div class="seg" id="mode-seg">
+        <button data-mode="tracking"><b>Voz</b><small>segue as palavras</small></button>
+        <button data-mode="classic"><b>Clássico</b><small>velocidade fixa</small></button>
+        <button data-mode="voice"><b>Ativado</b><small>anda enquanto fala</small></button>
+      </div>
+    </div>
+    <button class="start" id="b-start"><svg class="i"><use href="#i-play"/></svg>Iniciar leitura</button>
+    <p class="hint" id="idle-hint">A leitura começa no computador, com a contagem regressiva.</p>
+  </section>
+
+  <!-- Durante a leitura -->
+  <main id="control">
+    <div class="status">
+      <span id="chip" class="chip paused" role="status">Pausado</span>
+      <span id="page"></span>
+      <span id="timer"><b id="t-el"></b><span id="t-rem"></span></span>
+    </div>
+    <div id="prompt">
+      <div id="stage"><div id="text"></div></div>
+      <div id="countdown" hidden><b id="count-n">3</b><span>Prepare-se</span></div>
+      <div class="bars"><div class="bar" id="progress"><div></div></div><div class="bar" id="level"><div></div></div></div>
+    </div>
+    <div id="sections" hidden></div>
+    <div id="deck">
+      <div class="nav">
+        <button class="btn" id="b-prev" aria-label="Página anterior"><svg class="i"><use href="#i-prev"/></svg><span>Anterior</span></button>
+        <button class="btn" id="b-up" aria-label="Voltar uma linha"><svg class="i"><use href="#i-up"/></svg><span>Linha</span></button>
+        <button class="btn primary" id="b-play" aria-label="Pausar ou continuar">
+          <svg class="i i-play"><use href="#i-play"/></svg><svg class="i i-pause"><use href="#i-pause"/></svg><span id="play-label">Continuar</span>
+        </button>
+        <button class="btn" id="b-down" aria-label="Avançar uma linha"><svg class="i"><use href="#i-down"/></svg><span>Linha</span></button>
+        <button class="btn" id="b-next" aria-label="Próxima página"><svg class="i"><use href="#i-next"/></svg><span>Próxima</span></button>
+      </div>
+      <div class="speed">
+        <div class="label" id="speed-label">Velocidade<b id="speed-val">2,5 palavras/s</b></div>
+        <button id="b-slower" aria-label="Mais devagar">−</button>
+        <button id="b-faster" aria-label="Mais rápido">+</button>
+      </div>
+      <div class="tools">
+        <button class="tool danger" id="b-stop"><svg class="i"><use href="#i-stop"/></svg><span>Parar</span></button>
+        <button class="tool" id="b-restart"><svg class="i"><use href="#i-restart"/></svg><span>Do início</span></button>
+        <button class="tool" id="b-mute" aria-pressed="false"><svg class="i i-mic"><use href="#i-mic"/></svg><svg class="i i-mic-off"><use href="#i-mic-off"/></svg><span id="mute-label">Microfone</span></button>
+        <button class="tool" id="b-view"><svg class="i"><use href="#i-view"/></svg><span>Visual</span></button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Enviar texto -->
+  <section id="dir">
+    <textarea id="dir-text" placeholder="Escreva ou cole o roteiro aqui…"></textarea>
+    <div class="row">
+      <button id="dir-update">Trocar na leitura</button>
+      <button id="dir-go" class="go">Ler este texto</button>
+    </div>
+    <small>“Ler este texto” começa uma leitura nova no computador. “Trocar na leitura” troca o texto da página atual sem perder a posição.</small>
+  </section>
+
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-card" role="dialog" aria-label="Visual do celular">
+      <h3>Visual neste celular</h3>
+      <div class="opt"><div class="t">Tamanho do texto</div><div class="stepper"><button id="b-size-down" aria-label="Diminuir texto">A−</button><button id="b-size-up" aria-label="Aumentar texto">A+</button></div></div>
+      <div class="opt"><div class="t">Espelhar o texto<small>Para usar o celular num teleprompter com vidro</small></div><button class="switch" id="sw-mirror" role="switch" aria-checked="false" aria-label="Espelhar o texto"></button></div>
+      <div class="opt"><div class="t">Só os controles<small>Esconde o texto e deixa os botões maiores</small></div><button class="switch" id="sw-compact" role="switch" aria-checked="false" aria-label="Só os controles"></button></div>
+      <button class="done" id="b-sheet-done">Pronto</button>
+    </div>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+
+  <script>
+  (() => {
+    'use strict';
+    const HL = { white: '#ffffff', yellow: '#ffd60a', green: '#30d158', blue: '#64d2ff', pink: '#ff6fae', orange: '#ff9f0a' };
+    const SIZES = [20, 24, 28, 34, 42];
+    const $ = (s) => document.querySelector(s);
+    const body = document.body;
+    const params = new URLSearchParams(location.search);
+    const token = params.get('t') || '';
+
+    const st = {
+      connected: false, running: false, paused: true, muted: false, finished: false, counting: 0,
+      mode: 'tracking', speed: 2.5, rate: null, page: 0, pageCount: 1, pos: 0, total: 0,
+      elapsed: 0, remaining: null, over: false, sections: [], idle: null,
+    };
+    let ws = null;
+    let retry = null;
+    let spans = [];
+    let kinds = [];
+    let lastTop = null;
+
+    const store = {
+      get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+      set(k, v) { try { localStorage.setItem(k, v); } catch { /* sem armazenamento */ } },
+    };
+    let sizeIdx = Math.min(SIZES.length - 1, Math.max(0, Number(store.get('size') ?? 2) || 0));
+    const mirrorParam = params.get('mirror');
+    setMirror(mirrorParam !== null ? mirrorParam === '1' : store.get('mirror') === '1', false);
+    setCompact(store.get('compact') === '1', false);
+    applySize();
+
+    /* ── Conexão ── */
+    function connect() {
+      clearTimeout(retry);
+      if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      ws = new WebSocket(`${proto}://${location.host}/ws?t=${encodeURIComponent(token)}`);
+      ws.onopen = () => setConnected(true);
+      ws.onclose = () => {
+        setConnected(false);
+        retry = setTimeout(connect, 1500);
+      };
+      ws.onmessage = (e) => {
+        let msg;
+        try { msg = JSON.parse(e.data); } catch { return; }
+        if (msg.type === 'settings') onSettings(msg);
+        else if (msg.type === 'doc') renderDoc(msg);
+        else if (msg.type === 'state') onState(msg);
+        else if (msg.type === 'level') $('#level div').style.width = Math.round(msg.level * 100) + '%';
+        else if (msg.type === 'ended') onEnded(msg.idle);
+      };
+    }
+    // O iPhone suspende a página em segundo plano: ao voltar, reconecta na hora.
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) connect(); });
+
+    function setConnected(on) {
+      st.connected = on;
+      body.classList.toggle('offline', !on);
+      $('#offline').hidden = on;
+      $('#conn').classList.toggle('on', on);
+      $('#conn').setAttribute('aria-label', on ? 'Conectado' : 'Sem conexão');
+    }
+
+    function send(cmd, extra) {
+      if (!ws || ws.readyState !== 1) return false;
+      ws.send(JSON.stringify({ cmd, ...extra }));
+      navigator.vibrate?.(8);
+      return true;
+    }
+
+    /* ── Mensagens do computador ── */
+    function onSettings(m) {
+      st.mode = m.mode || st.mode;
+      st.speed = m.speed ?? st.speed;
+      document.documentElement.style.setProperty('--hl', HL[m.highlight] || HL.yellow);
+      render();
+    }
+
+    function onState(m) {
+      Object.assign(st, {
+        running: true, paused: !!m.paused, muted: !!m.muted, finished: !!m.finished, counting: m.counting || 0,
+        mode: m.mode || st.mode, speed: m.speed ?? st.speed, rate: m.rate ?? st.rate,
+        page: m.page ?? st.page, pageCount: m.pageCount ?? st.pageCount, total: m.total ?? st.total,
+        elapsed: m.elapsed ?? 0, remaining: m.remaining ?? null, over: !!m.over,
+      });
+      if (m.pos !== st.pos) paint(m.pos);
+      $('#progress div').style.width = (st.total ? Math.min(100, Math.round((st.pos / st.total) * 100)) : 0) + '%';
+      render();
+    }
+
+    function onEnded(idle) {
+      Object.assign(st, { running: false, paused: true, finished: false, counting: 0, pos: 0, total: 0, idle: idle || st.idle });
+      spans = [];
+      $('#text').replaceChildren();
+      $('#progress div').style.width = '0';
+      $('#level div').style.width = '0';
+      render();
+    }
+
+    function renderDoc(d) {
+      st.running = true;
+      st.page = d.page ?? 0;
+      st.pageCount = d.pageCount ?? 1;
+      if (d.highlight) document.documentElement.style.setProperty('--hl', HL[d.highlight] || HL.yellow);
+      const text = $('#text');
+      text.replaceChildren();
+      kinds = d.tokens.map((t) => (t.n ? 'note' : t.h ? 'heading' : ''));
+      spans = d.tokens.map((t, i) => {
+        const s = document.createElement('span');
+        s.textContent = t.t;
+        s.dataset.i = i;
+        text.appendChild(s);
+        if (t.nl >= 2) { const g = document.createElement('span'); g.className = 'gap'; text.appendChild(g); }
+        else if (t.nl === 1) text.appendChild(document.createElement('br'));
+        else text.appendChild(document.createTextNode(' '));
+        return s;
+      });
+      st.sections = d.sections || [];
+      const box = $('#sections');
+      box.hidden = !st.sections.length;
+      box.replaceChildren(...st.sections.map((s, n) => {
+        const b = document.createElement('button');
+        b.dataset.index = s.index;
+        if (n < 9) { const k = document.createElement('span'); k.textContent = n + 1; b.appendChild(k); }
+        b.appendChild(document.createTextNode(s.title));
+        return b;
+      }));
+      if (!$('#dir-text').value) $('#dir-text').value = typeof d.text === 'string' ? d.text : d.tokens.map((t) => t.t + (t.nl ? '\n'.repeat(t.nl) : ' ')).join('').trim();
+      lastTop = null;
+      paint(0);
+      render();
+    }
+
+    function paint(p) {
+      st.pos = p;
+      spans.forEach((s, i) => {
+        const state = i < p ? 'read' : i === p && !kinds[i] ? 'cur' : '';
+        s.className = [kinds[i], state].filter(Boolean).join(' ');
+      });
+      scroll();
+      // Seção atual em destaque.
+      let cur = -1;
+      st.sections.forEach((s, n) => { if (s.index <= p) cur = n; });
+      [...$('#sections').children].forEach((b, n) => b.classList.toggle('current', n === cur));
+    }
+
+    function scroll() {
+      if (!spans.length || $('#prompt').offsetParent === null) return;
+      const el = spans[Math.min(st.pos, spans.length - 1)];
+      if (el.offsetTop === lastTop) return;
+      lastTop = el.offsetTop;
+      const anchor = $('#prompt').clientHeight * 0.3;
+      $('#text').style.transform = `translateY(${Math.min(0, Math.round(anchor - el.offsetTop))}px)`;
+    }
+
+    const fmt = (s) => {
+      s = Math.max(0, Math.round(s));
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const ss = String(s % 60).padStart(2, '0');
+      return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
+    };
+    const num = (n) => String(Math.round(n * 100) / 100).replace('.', ',');
+
+    /** Atualiza tudo o que depende do estado (rótulos, classes, botões). */
+    function render() {
+      body.classList.toggle('idle', !st.running);
+      body.classList.toggle('running', st.running);
+      body.classList.toggle('paused', st.paused);
+      for (const m of ['tracking', 'classic', 'voice']) body.classList.toggle('mode-' + m, st.mode === m);
+
+      // Antes de começar
+      const idle = st.idle;
+      $('#idle-name').textContent = idle?.name || 'Roteiro aberto no editor';
+      const parts = [];
+      if (idle) {
+        if (idle.pages > 1) parts.push(`${idle.pages} páginas`);
+        parts.push(`${idle.words} ${idle.words === 1 ? 'palavra' : 'palavras'}`);
+        if (idle.minutes) parts.push(`~${idle.minutes} min`);
+      }
+      $('#idle-meta').textContent = parts.join(' · ');
+      $('#idle-preview').textContent = idle?.preview || '';
+      const empty = idle && !idle.words;
+      $('#b-start').disabled = !!empty;
+      $('#idle-hint').textContent = empty
+        ? 'O roteiro no computador está vazio. Use “Enviar texto” para mandar um daqui.'
+        : 'A leitura começa no computador, com a contagem regressiva.';
+      document.querySelectorAll('#mode-seg button').forEach((b) => b.classList.toggle('active', b.dataset.mode === st.mode));
+
+      // Durante a leitura
+      const chip = $('#chip');
+      chip.className = 'chip ' + (st.counting ? 'counting' : st.finished ? '' : st.paused ? 'paused' : 'live');
+      chip.textContent = st.counting ? `Começa em ${st.counting}` : st.finished ? 'Fim' : st.paused ? 'Pausado' : 'Lendo';
+      $('#countdown').hidden = !st.counting;
+      $('#count-n').textContent = st.counting;
+      $('#page').textContent = st.pageCount > 1 ? `Página ${st.page + 1}/${st.pageCount}` : '';
+      $('#t-el').textContent = st.running ? fmt(st.elapsed) : '';
+      $('#t-rem').textContent = st.running && st.remaining != null ? `${body.classList.contains('compact') ? '' : ' · '}faltam ${fmt(st.remaining)}` : '';
+      $('#timer').classList.toggle('over', st.over);
+      $('#play-label').textContent = st.paused ? 'Continuar' : 'Pausar';
+      $('#b-prev').disabled = st.page <= 0;
+      $('#b-next').disabled = st.page >= st.pageCount - 1;
+      $('#b-mute').setAttribute('aria-pressed', String(st.muted));
+      $('#mute-label').textContent = st.muted ? 'Mic. desligado' : 'Microfone';
+      if (st.mode === 'tracking') {
+        $('#speed-label').firstChild.textContent = 'Seu ritmo de leitura';
+        $('#speed-val').textContent = st.rate ? `${num(st.rate)} palavras/s` : 'aprendendo…';
+      } else {
+        $('#speed-label').firstChild.textContent = st.mode === 'voice' ? 'Velocidade enquanto você fala' : 'Velocidade';
+        $('#speed-val').textContent = `${num(st.speed)} palavras/s`;
+      }
+      $('#dir-update').disabled = !st.running;
+      requestAnimationFrame(scroll);
+    }
+
+    /* ── Botões ── */
+    let toastTimer = null;
+    function toast(msg) {
+      const t = $('#toast');
+      t.textContent = msg;
+      t.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
+    }
+
+    $('#b-play').onclick = () => send('togglePause');
+    $('#b-prev').onclick = () => send('prevPage');
+    $('#b-next').onclick = () => send('nextPage');
+    $('#b-up').onclick = () => send('lineUp');
+    $('#b-down').onclick = () => send('lineDown');
+    $('#b-restart').onclick = () => { if (send('restartPage')) toast('Voltou para o início da página'); };
+    $('#b-mute').onclick = () => send('toggleMute');
+    $('#b-slower').onclick = () => send('speed', { delta: -0.25 });
+    $('#b-faster').onclick = () => send('speed', { delta: 0.25 });
+    $('#b-start').onclick = () => send('start');
+
+    // Parar pede um segundo toque, para não encerrar a leitura sem querer.
+    let stopArmed = null;
+    $('#b-stop').onclick = () => {
+      const b = $('#b-stop');
+      if (stopArmed) {
+        clearTimeout(stopArmed);
+        stopArmed = null;
+        b.classList.remove('armed');
+        b.lastElementChild.textContent = 'Parar';
+        send('stop');
+        return;
+      }
+      b.classList.add('armed');
+      b.lastElementChild.textContent = 'Confirmar';
+      toast('Toque de novo para parar a leitura');
+      stopArmed = setTimeout(() => {
+        stopArmed = null;
+        b.classList.remove('armed');
+        b.lastElementChild.textContent = 'Parar';
+      }, 2500);
+    };
+
+    $('#mode-seg').onclick = (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (send('setMode', { mode: b.dataset.mode })) {
+        st.mode = b.dataset.mode;
+        render();
+      }
+    };
+
+    $('#sections').onclick = (e) => {
+      const b = e.target.closest('button');
+      if (b) send('jump', { index: Number(b.dataset.index) });
+    };
+    $('#text').addEventListener('click', (e) => {
+      if (e.target.dataset.i !== undefined) send('jump', { index: Number(e.target.dataset.i) });
+    });
+
+    // Visual (só deste celular)
+    $('#b-view').onclick = () => { $('#sheet').hidden = false; };
+    $('#b-sheet-done').onclick = () => { $('#sheet').hidden = true; };
+    $('#sheet').onclick = (e) => { if (e.target.id === 'sheet') $('#sheet').hidden = true; };
+    $('#b-size-down').onclick = () => { sizeIdx = Math.max(0, sizeIdx - 1); applySize(true); };
+    $('#b-size-up').onclick = () => { sizeIdx = Math.min(SIZES.length - 1, sizeIdx + 1); applySize(true); };
+    $('#sw-mirror').onclick = () => setMirror(!body.classList.contains('mirror'), true);
+    $('#sw-compact').onclick = () => setCompact(!body.classList.contains('compact'), true);
+
+    function applySize(save) {
+      document.documentElement.style.setProperty('--fs', SIZES[sizeIdx] + 'px');
+      if (save) store.set('size', String(sizeIdx));
+      lastTop = null;
+      requestAnimationFrame(scroll);
+    }
+    function setMirror(on, save) {
+      body.classList.toggle('mirror', on);
+      $('#sw-mirror').setAttribute('aria-checked', String(on));
+      if (save) store.set('mirror', on ? '1' : '0');
+    }
+    function setCompact(on, save) {
+      body.classList.toggle('compact', on);
+      $('#sw-compact').setAttribute('aria-checked', String(on));
+      if (save) store.set('compact', on ? '1' : '0');
+      lastTop = null;
+      if (save) render();
+    }
+
+    // Enviar texto
+    $('#dir-go').onclick = () => {
+      const text = $('#dir-text').value;
+      if (!text.trim()) { toast('Escreva um texto primeiro'); return; }
+      if (send('setText', { text })) showTab('control');
+    };
+    $('#dir-update').onclick = () => { if (send('updateText', { text: $('#dir-text').value })) toast('Texto trocado'); };
+
+    function showTab(name) {
+      body.classList.toggle('tab-dir', name === 'dir');
+      document.querySelectorAll('.tabs button').forEach((t) => t.classList.toggle('active', t.dataset.tab === name));
+      if (name === 'control') { lastTop = null; requestAnimationFrame(scroll); }
+    }
+    document.querySelectorAll('.tabs button').forEach((t) => { t.onclick = () => showTab(t.dataset.tab); });
+
+    // Teclado (tablet com teclado): espaço pausa, setas andam linhas e páginas.
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'TEXTAREA' || body.classList.contains('tab-dir')) return;
+      const map = { ' ': 'togglePause', ArrowUp: 'lineUp', ArrowDown: 'lineDown', ArrowLeft: 'prevPage', ArrowRight: 'nextPage', PageUp: 'prevPage', PageDown: 'nextPage' };
+      if (!map[e.key]) return;
+      e.preventDefault();
+      if (st.running) send(map[e.key]);
+      else if (e.key === ' ') send('start');
+    });
+    window.addEventListener('resize', () => { lastTop = null; scroll(); });
+
+    render();
+    connect();
+  })();
+  </script>
+</body>
+</html>

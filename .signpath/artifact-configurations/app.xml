@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configuração de artefato "app" para o SignPath (cole no projeto do SignPath com o slug "app").
+  O build envia a pasta win-unpacked compactada; só o executável do InPromptu é assinado.
+  As DLLs do Electron/Chromium são de terceiros e não são assinadas com o certificado do projeto.
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <!-- O electron-builder grava a versão do produto do .exe com 4 partes (ex.: 2.0.0.0). -->
+    <pe-file path="InPromptu.exe" product-name="InPromptu" product-version="${version}.0">
+      <authenticode-sign/>
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

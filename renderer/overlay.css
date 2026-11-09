@@ -1,0 +1,278 @@
+:root {
+  --ear: 14px;        /* igual a EAR em main.js */
+  --bar: 40px;        /* igual a BAR_H em main.js */
+  --hl: #ffd60a;
+  --fs: 20px;
+  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --bg: #000;
+  --upcoming: rgba(255, 255, 255, 0.9);
+  --muted: rgba(255, 255, 255, 0.5);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  color: #fff;
+  font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#root { position: absolute; inset: 0; }
+
+#island {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* ── Ilha no topo (estilo Dynamic Island, logo abaixo da webcam) ── */
+body[data-kind="notch"] #island {
+  left: var(--ear);
+  right: var(--ear);
+  border-radius: 0 0 26px 26px;
+  overflow: visible;
+}
+body[data-kind="notch"] #island::before,
+body[data-kind="notch"] #island::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: var(--ear);
+  height: var(--ear);
+  pointer-events: none;
+}
+body[data-kind="notch"] #island::before {
+  left: calc(-1 * var(--ear));
+  background: radial-gradient(circle at 0 100%, transparent calc(var(--ear) - 0.5px), var(--bg) var(--ear));
+}
+body[data-kind="notch"] #island::after {
+  right: calc(-1 * var(--ear));
+  background: radial-gradient(circle at 100% 100%, transparent calc(var(--ear) - 0.5px), var(--bg) var(--ear));
+}
+body[data-kind="notch"] #viewport { border-radius: 0 0 4px 4px; }
+
+/* ── Janela flutuante ── */
+body[data-kind="floating"] #island {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  --bg: rgba(16, 16, 18, 0.94);
+}
+body[data-kind="floating"].glass #island {
+  border-radius: 0;
+  border: 0;
+  --bg: rgba(0, 0, 0, var(--glass, 0.3));
+}
+body[data-kind="floating"] #bar { -webkit-app-region: drag; cursor: grab; }
+body[data-kind="floating"] #bar button { -webkit-app-region: no-drag; }
+body.follow #bar .buttons { display: none; }
+
+/* ── Tela cheia (valores vêm das configurações, ver applyStyle em overlay.js) ── */
+body[data-kind="fullscreen"] {
+  --fs-pad: max(3vw, calc(var(--lh, 90px) * 0.6));
+  --upcoming: var(--fs-text, #fff);
+}
+body[data-kind="fullscreen"] #island { --bar: 64px; background: var(--fs-bg, #000); }
+body[data-kind="fullscreen"].cam-bg #island { background: #000; }
+body[data-kind="fullscreen"] #viewport { padding: 0 var(--fs-pad); z-index: 1; }
+body[data-kind="fullscreen"] #text {
+  max-width: var(--fs-column, 80%);
+  margin: 0 auto;
+  text-align: var(--fs-align, left);
+  font-weight: var(--fs-weight, 500);
+  line-height: var(--fs-line, 1.45);
+  letter-spacing: var(--fs-letter, 0);
+  text-transform: var(--fs-case, none);
+  -webkit-text-stroke: var(--fs-outline, 0) rgba(0, 0, 0, 0.92);
+  paint-order: stroke fill;
+}
+body[data-kind="fullscreen"] #bar { position: relative; z-index: 3; padding: 0 var(--fs-pad); gap: 18px; transition: opacity 0.25s; }
+body[data-kind="fullscreen"].nobar #bar { opacity: 0; }
+body[data-kind="fullscreen"].nobar #bar:hover { opacity: 1; }
+body[data-kind="fullscreen"] #bar button { width: 44px; height: 44px; }
+body[data-kind="fullscreen"] #bar svg { width: 24px; height: 24px; }
+body[data-kind="fullscreen"] #page, body[data-kind="fullscreen"] #status { font-size: 15px; }
+body[data-kind="fullscreen"] #banner { background: rgba(0, 0, 0, 0.55); z-index: 4; }
+
+/* Espelho (vidro de teleprompter) e monitor em pé */
+body[data-mirror="horizontal"] #island { transform: scaleX(-1); }
+body[data-mirror="vertical"] #island { transform: scaleY(-1); }
+body[data-mirror="both"] #island { transform: rotate(180deg); }
+body[data-rotate="right"] #root,
+body[data-rotate="left"] #root { inset: auto; top: 0; left: 0; width: 100vh; height: 100vw; transform-origin: top left; }
+body[data-rotate="right"] #root { transform: translateX(100vw) rotate(90deg); }
+body[data-rotate="left"] #root { transform: translateY(100vh) rotate(-90deg); }
+
+/* Linha de leitura */
+#marker { position: absolute; left: 0; right: 0; top: var(--anchor-px, 30%); height: var(--lh, 1.45em); padding: 0 var(--fs-pad); z-index: 2; pointer-events: none; }
+#marker[hidden] { display: none; }
+#marker .col { position: relative; max-width: var(--fs-column, 80%); height: 100%; margin: 0 auto; }
+#marker.arrow .col::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--lh) * -0.5);
+  transform: translateY(-50%);
+  border-style: solid;
+  border-color: transparent transparent transparent var(--hl);
+  border-width: calc(var(--lh) * 0.2) 0 calc(var(--lh) * 0.2) calc(var(--lh) * 0.28);
+}
+#marker.band {
+  background: color-mix(in srgb, var(--hl) 9%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--hl) 40%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--hl) 40%, transparent);
+}
+
+/* Câmera (webcam ou Câmera Virtual do OBS) */
+#cam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
+#cam[hidden] { display: none; }
+/* No canto de cima: cobre o texto já lido, não o que vem pela frente. */
+#cam.corner {
+  inset: auto;
+  right: var(--fs-pad);
+  top: 3vh;
+  width: 24%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  z-index: 2;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Texto ── */
+#viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px 20px 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%);
+}
+/* Esmaecido curto nas bordas: com fonte grande, cada linha escondida faz falta. */
+body[data-kind="fullscreen"] #viewport {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 5%, #000 93%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 5%, #000 93%, transparent 100%);
+}
+
+#text {
+  position: relative;
+  font-family: var(--font);
+  font-size: var(--fs);
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--upcoming);
+  will-change: transform; /* a rolagem é animada em overlay.js (updateScroll) */
+  word-wrap: break-word;
+}
+#text .w { cursor: pointer; border-radius: 4px; transition: color 0.18s, background-color 0.18s; }
+#text .w:hover { background: rgba(255, 255, 255, 0.12); }
+#text .w.read { color: var(--hl); opacity: 0.55; }
+#text .w.cur {
+  color: var(--hl);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+}
+#text .gap { display: block; height: 0.55em; }
+/* Notas de direção [entre colchetes]: não são lidas */
+#text .w.note { color: #7dd3fc; font-style: italic; font-weight: 400; font-size: 0.78em; -webkit-text-stroke: 0; }
+#text .w.note.read { opacity: 0.35; }
+/* Seções (# Título) */
+#text .w.heading { color: var(--hl); font-weight: 700; font-size: 0.62em; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
+#text .w.heading.read { opacity: 0.4; }
+body.paused #text { opacity: 0.6; }
+
+#banner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: var(--bar);
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--fs) * 1.1);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(2px);
+  text-align: center;
+  padding: 0 16px;
+}
+#banner[hidden] { display: none; }
+#banner b { color: var(--hl); font-size: 1.6em; display: block; }
+
+/* ── Barra de controles ── */
+#bar {
+  flex: 0 0 var(--bar);
+  height: var(--bar);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 0 16px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+#wave { width: 44px; height: 20px; flex: none; }
+body[data-guidance="classic"] #wave,
+body[data-guidance="classic"] #b-mute { display: none; }
+#status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40%; }
+#status:empty { display: none; }
+#status.error { color: #ff6b6b; }
+#progress {
+  flex: 1;
+  height: 3px;
+  min-width: 30px;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
+  overflow: hidden;
+}
+#progress-fill { height: 100%; width: 0; background: var(--hl); transition: width 0.3s; }
+#page { font-variant-numeric: tabular-nums; white-space: nowrap; }
+#page:empty { display: none; }
+#timer { font-variant-numeric: tabular-nums; white-space: nowrap; }
+#timer:empty { display: none; }
+#timer.over { color: #ff9f0a; }
+body[data-kind="fullscreen"] #timer { font-size: 15px; }
+/* Segunda tela: só o texto, sem controles */
+body.follower #bar { display: none; }
+body.follower #island { --bar: 0px; }
+
+.buttons { display: flex; gap: 2px; opacity: 0.7; transition: opacity 0.2s; }
+#island:hover .buttons { opacity: 1; }
+#bar button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+}
+#bar button:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
+#bar button:disabled { opacity: 0.3; pointer-events: none; }
+#bar svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#b-play .i-play { fill: currentColor; }
+#b-play .i-play, body.paused #b-play .i-pause { display: none; }
+body.paused #b-play .i-play { display: block; }
+#b-mute .i-mic-off, body.muted #b-mute .i-mic { display: none; }
+body.muted #b-mute .i-mic-off { display: block; }
+body.muted #b-mute { color: #ff6b6b; }
+#b-stop:hover { background: rgba(255, 80, 80, 0.25) !important; }

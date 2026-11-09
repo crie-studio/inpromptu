@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- InPromptu: linhas de texto; a linha sendo lida (amarela) vira a onda da sua voz. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#26262f"/>
+      <stop offset="1" stop-color="#0c0c10"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M111 172H281" stroke="#f5f5f7" stroke-width="34" opacity="0.55"/>
+    <path d="M111 256H239" stroke="#ffd60a" stroke-width="34"/>
+    <path d="M291 234V278M329 204V308M367 222V290M405 242V270" stroke="#ffd60a" stroke-width="26"/>
+    <path d="M111 340H295" stroke="#f5f5f7" stroke-width="34"/>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+@font-face {
+  font-family: "OpenDyslexic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/opendyslexic/files/opendyslexic-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "OpenDyslexic";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../node_modules/@fontsource/opendyslexic/files/opendyslexic-latin-700-normal.woff2") format("woff2");
+}

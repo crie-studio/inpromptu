@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configuração de artefato "installer" para o SignPath (cole no projeto do SignPath com o slug "installer").
+  O build envia o instalador já com o InPromptu.exe assinado dentro, com o nome fixo InPromptu-Setup.exe.
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <pe-file path="InPromptu-Setup.exe" product-name="InPromptu" product-version="${version}">
+      <authenticode-sign/>
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

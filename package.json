@@ -1,0 +1,103 @@
+{
+  "name": "inpromptu",
+  "productName": "InPromptu",
+  "version": "2.0.0",
+  "description": "O teleprompter que acompanha a sua voz: gratuito, offline e de código aberto, para Windows.",
+  "main": "main.js",
+  "author": "Luiz Felipe Pitzer Jacob",
+  "license": "MIT",
+  "private": true,
+  "keywords": [
+    "teleprompter",
+    "windows",
+    "speech-recognition",
+    "obs",
+    "vosk",
+    "portuguese"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/vendor.js",
+    "start": "electron .",
+    "icon": "electron scripts/make-icon.js",
+    "test": "node scripts/text-test.js && node scripts/srt-test.js && node scripts/obs-test.js",
+    "test:text": "node scripts/text-test.js",
+    "test:asr": "electron scripts/asr-test.js",
+    "dist": "electron-builder --win",
+    "vendor": "node scripts/vendor.js",
+    "obs-mock": "node scripts/obs-mock.js"
+  },
+  "dependencies": {
+    "@fontsource/opendyslexic": "5.3.0",
+    "jszip": "3.10.2",
+    "qrcode": "1.5.4",
+    "vosk-browser": "0.0.8",
+    "ws": "8.22.0"
+  },
+  "devDependencies": {
+    "@ricky0123/vad-web": "0.0.31",
+    "electron": "45.1.0",
+    "electron-builder": "26.18.0",
+    "onnxruntime-web": "1.31.1"
+  },
+  "build": {
+    "appId": "br.app.lfp.inpromptu",
+    "productName": "InPromptu",
+    "copyright": "Copyright © 2026 Luiz Felipe Pitzer Jacob",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**",
+      "renderer/**",
+      "assets/**",
+      "package.json"
+    ],
+    "extraFiles": [
+      {
+        "from": "LICENSE",
+        "to": "LICENSE.txt"
+      },
+      {
+        "from": "THIRD_PARTY_NOTICES.md",
+        "to": "THIRD_PARTY_NOTICES.txt"
+      }
+    ],
+    "protocols": [
+      {
+        "name": "InPromptu",
+        "schemes": [
+          "inpromptu"
+        ]
+      }
+    ],
+    "fileAssociations": [
+      {
+        "ext": "inpromptu",
+        "name": "InPromptu",
+        "description": "Roteiro do InPromptu"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "InPromptu",
+      "artifactName": "InPromptu-Setup-${version}.exe",
+      "language": "1046"
+    }
+  }
+}
