@@ -6,6 +6,12 @@
   "main": "main.js",
   "author": "Luiz Felipe Pitzer Jacob",
   "license": "MIT",
+  "homepage": "https://github.com/crie-studio/inpromptu",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/crie-studio/inpromptu.git"
+  },
+  "bugs": "https://github.com/crie-studio/inpromptu/issues",
   "private": true,
   "keywords": [
     "teleprompter",

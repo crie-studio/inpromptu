@@ -13,8 +13,8 @@ with the app (Electron/Chromium libraries, `ffmpeg.dll` and others) are not sign
 
 | Role | Members |
 | --- | --- |
-| Committers and reviewers | [Luiz Felipe Pitzer Jacob](https://github.com/GITHUB_USER) |
-| Approvers | [Luiz Felipe Pitzer Jacob](https://github.com/GITHUB_USER) |
+| Committers and reviewers | [Luiz Felipe Pitzer Jacob](https://github.com/crie-studio) |
+| Approvers | [Luiz Felipe Pitzer Jacob](https://github.com/crie-studio) |
 
 Committers may change the source without additional review. Reviewers review every change proposed by
 non-committers (pull requests). Approvers approve each signing request. All members use multi-factor

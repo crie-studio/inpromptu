@@ -10,7 +10,7 @@ ser assinada. Enquanto a assinatura não estiver configurada, o build gera o ins
 - [ ] Verificação em duas etapas ligada na sua conta do GitHub.
 - [ ] Pelo menos uma versão publicada (sem assinatura) em *Releases*. A SignPath exige que o projeto já tenha
       sido lançado no formato que será assinado.
-- [ ] Em `CODE_SIGNING_POLICY.md`, troque `GITHUB_USER` pelo seu usuário do GitHub.
+- [x] Papéis da equipe em `CODE_SIGNING_POLICY.md` (conta `crie-studio`).
 
 ## 2. Pedir a assinatura
 
