@@ -10,6 +10,7 @@
 <p align="center">
   <a href="../../releases/latest"><b>Baixar para Windows</b></a> ·
   <a href="https://crie-studio.github.io/inpromptu/"><b>Usar no navegador</b></a> ·
+  <a href="https://crie-studio.github.io/inpromptu/sobre/">Conhecer</a> ·
   <a href="#como-usar">Como usar</a> ·
   <a href="README.en.md">English</a>
 </p>

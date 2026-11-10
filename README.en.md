@@ -10,6 +10,7 @@
 <p align="center">
   <a href="../../releases/latest"><b>Download for Windows</b></a> ·
   <a href="https://crie-studio.github.io/inpromptu/"><b>Use in your browser</b></a> ·
+  <a href="https://crie-studio.github.io/inpromptu/sobre/">Tour (Portuguese)</a> ·
   <a href="README.md">Português</a>
 </p>
 

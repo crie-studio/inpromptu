@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>InPromptu</title>
+<link rel="icon" href="../icon.png">
+<link rel="apple-touch-icon" href="../icon-192.png">
+<meta name="theme-color" content="#0b0c10">
+<meta property="og:type" content="website">
+<meta property="og:title" content="InPromptu">
+<meta property="og:description" content="O teleprompter que acompanha a sua voz: gratuito, offline e de código aberto, para Windows e para o navegador.">
+<meta property="og:image" content="https://crie-studio.github.io/inpromptu/icon.png">
+<meta property="og:url" content="https://crie-studio.github.io/inpromptu/sobre/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="O teleprompter que acompanha a sua voz: gratuito, offline e de código aberto, para Windows e para o navegador.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: o espelho de um telejornal. Cada bloco é um trecho do roteiro, marcado com o tempo
+   em que você chegaria nele lendo esta página em voz alta, no ritmo de 2,9 palavras por segundo. */
+:root {
+  --stage: #0b0c10;     /* estúdio apagado */
+  --panel: #13141a;     /* vidro do teleprompter */
+  --panel-2: #1c1d25;
+  --rule: #272934;
+  --text: #edece6;      /* papel sob a luz do estúdio */
+  --dim: #9c9da8;
+  --faint: #5d5e69;
+  --read: #ffd60a;      /* a linha que está sendo lida */
+  --read-ink: #1c1600;
+  --note: #7dd3fc;      /* notas de direção */
+  --tally: #ff453a;     /* luz de "no ar" */
+  --ok: #30d158;
+  --display: "Bricolage Grotesque", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --s--1: clamp(13px, 0.78rem + 0.1vw, 14px);
+  --s-0: clamp(16px, 0.95rem + 0.2vw, 18px);
+  --s-1: clamp(19px, 1.05rem + 0.5vw, 23px);
+  --s-2: clamp(26px, 1.2rem + 1.6vw, 40px);
+  --s-3: clamp(34px, 1.3rem + 3.4vw, 66px);
+  --s-4: clamp(44px, 1.4rem + 6.6vw, 118px);
+  --ease: cubic-bezier(.2, .75, .15, 1);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+html { background: var(--stage); overflow-x: clip; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--stage);
+  color: var(--text);
+  font: 400 var(--s-0)/1.62 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--read); color: var(--read-ink); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--read); outline-offset: 3px; border-radius: 6px; }
+.wrap { max-width: 1180px; margin-inline: auto; }
+h1, h2, h3 { font-family: var(--display); font-stretch: 84%; font-weight: 700; line-height: 1.02; letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+h2 { font-size: var(--s-3); }
+h3 { font-size: var(--s-2); line-height: 1.08; }
+p { margin: 0; }
+.lede { font-size: var(--s-1); color: var(--dim); max-width: 34em; line-height: 1.5; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* Barra de leitura da página (como a barra de progresso do teleprompter). */
+.progress { position: fixed; z-index: 30; left: 0; right: 0; top: env(safe-area-inset-top, 0px); height: 3px; background: transparent; pointer-events: none; }
+.progress i { display: block; height: 100%; width: 100%; background: var(--read); transform-origin: 0 50%; transform: scaleX(0); }
+@supports (animation-timeline: scroll()) {
+  .progress i { animation: grow linear both; animation-timeline: scroll(root); }
+}
+@keyframes grow { to { transform: scaleX(1); } }
+
+/* ── Topo ── */
+.top { display: flex; align-items: center; gap: 20px; padding-block: 22px 8px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 700; font-size: 20px; font-stretch: 88%; letter-spacing: -0.01em; }
+.logo { width: 34px; height: 34px; flex: none; }
+.logo .bar { transform-box: fill-box; transform-origin: 50% 50%; }
+@media (prefers-reduced-motion: no-preference) {
+  .logo .bar { animation: talk 1.1s var(--ease) infinite alternate; }
+  .logo .bar:nth-child(2) { animation-delay: -.35s; }
+  .logo .bar:nth-child(3) { animation-delay: -.7s; }
+  .logo .bar:nth-child(4) { animation-delay: -.2s; }
+}
+@keyframes talk { from { transform: scaleY(.45); } to { transform: scaleY(1.05); } }
+.nav { display: flex; align-items: center; gap: 22px; margin-left: auto; font-size: var(--s--1); }
+.nav a { text-decoration: none; color: var(--dim); }
+.nav a:hover { color: var(--text); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 999px; border: 1px solid var(--rule); background: var(--panel-2); color: var(--text); font: 700 var(--s-0)/1 var(--body); text-decoration: none; cursor: pointer; transition: transform .2s var(--ease), background .2s, border-color .2s; }
+.btn:hover { border-color: #3a3c49; transform: translateY(-1px); }
+.btn.primary { background: var(--read); border-color: var(--read); color: var(--read-ink); }
+.btn.primary:hover { background: #ffe14d; }
+.btn svg { width: 18px; height: 18px; }
+.nav .btn { min-height: 38px; padding: 0 16px; font-size: var(--s--1); color: var(--text); }
+@media (max-width: 760px) { .nav a:not(.btn) { display: none; } }
+
+/* ── Abertura ── */
+.hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(28px, 4vw, 64px); align-items: center; padding-block: clamp(28px, 6vw, 72px) clamp(40px, 6vw, 88px); }
+@media (max-width: 960px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+.hero-copy { display: grid; gap: 26px; min-width: 0; }
+.slug { display: flex; align-items: baseline; gap: 12px; font: 500 12px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.slug .tc { color: var(--read); letter-spacing: .04em; }
+.slug .rule { flex: 1; height: 1px; background: var(--rule); align-self: center; }
+h1 { font-size: var(--s-4); line-height: .94; letter-spacing: -0.035em; font-stretch: 78%; }
+h1 .hw { transition: color .25s; }
+h1.reading .hw { color: var(--faint); }
+h1.reading .hw.lit { color: var(--text); }
+h1 .hw.cur { color: var(--read); text-decoration: underline; text-decoration-thickness: .08em; text-underline-offset: .12em; }
+.ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+.fine { font: 400 13px/1.5 var(--mono); color: var(--faint); }
+
+/* ── Teleprompter (o mesmo desenho do app) ── */
+.prompter { position: relative; min-width: 0; display: grid; gap: 12px; }
+.glass { position: relative; border-radius: 22px; background: var(--panel); border: 1px solid var(--rule); overflow: hidden; }
+.pt { position: relative; height: 100%; overflow: hidden; }
+.pt-text { position: relative; will-change: transform; padding: 0 clamp(18px, 3vw, 34px); font-weight: 700; color: rgba(237, 236, 230, .93); }
+.pt-text .w { transition: color .18s; }
+.pt-text .w.r { color: var(--read); opacity: .5; }
+.pt-text .w.c { color: var(--read); text-decoration: underline; text-decoration-thickness: .1em; text-underline-offset: .18em; }
+.pt-text .n { color: var(--note); font-style: italic; font-weight: 400; font-size: .74em; }
+.pt-text .n.act { color: #b8a6ff; }
+.pt-text .h { display: inline-block; color: var(--read); font: 700 .5em/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.pt-text .r.n, .pt-text .r.h { opacity: .4; }
+.pt-text .gap { display: block; height: .55em; }
+.hero-pt { height: clamp(250px, 34vw, 400px); -webkit-mask-image: linear-gradient(#0000 0, #000 16%, #000 78%, #0000 100%); mask-image: linear-gradient(#0000 0, #000 16%, #000 78%, #0000 100%); }
+.hero-pt .pt-text { font-size: clamp(22px, 1rem + 1.25vw, 32px); line-height: 1.38; }
+.readline { position: absolute; left: 0; right: 0; top: 36%; height: 0; pointer-events: none; }
+.readline::before { content: ""; position: absolute; left: 8px; top: -7px; border: 7px solid transparent; border-left: 10px solid var(--read); opacity: .85; }
+.pbar { display: flex; align-items: center; gap: 14px; padding: 10px 14px 10px 16px; border-top: 1px solid var(--rule); background: #101116; }
+.pbar canvas { width: 92px; height: 34px; flex: none; }
+.pbar .track { flex: 1; height: 4px; border-radius: 4px; background: #24252d; overflow: hidden; min-width: 40px; }
+.pbar .track i { display: block; height: 100%; width: 0; background: var(--read); }
+.pbar .time { font: 500 13px/1 var(--mono); color: var(--dim); white-space: nowrap; }
+.pbar .status { font: 500 12px/1 var(--mono); color: var(--read); white-space: nowrap; }
+@media (max-width: 520px) { .pbar canvas { width: 60px; } .pbar .status { display: none; } }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--rule); background: transparent; color: var(--text); font: 700 14px/1 var(--body); cursor: pointer; }
+.chip:hover { background: var(--panel-2); }
+.chip svg { width: 16px; height: 16px; }
+.rate { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; color: var(--dim); }
+.rate input { width: 120px; accent-color: var(--read); }
+.rate output { font: 500 13px/1 var(--mono); color: var(--text); min-width: 4.6em; }
+.caption { font-size: 13px; color: var(--faint); }
+details.mine summary { cursor: pointer; font-size: 14px; color: var(--dim); list-style: none; }
+details.mine summary::-webkit-details-marker { display: none; }
+details.mine summary::before { content: "+ "; color: var(--read); font-family: var(--mono); }
+details.mine[open] summary::before { content: "− "; }
+details.mine textarea { display: block; width: 100%; min-height: 120px; margin-top: 10px; padding: 14px; border-radius: 14px; border: 1px solid var(--rule); background: var(--panel); color: var(--text); font: 400 15px/1.5 var(--body); resize: vertical; }
+details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
+
+/* ── Blocos ── */
+.seg { display: grid; gap: clamp(22px, 3vw, 34px); padding-block: clamp(56px, 9vw, 120px); border-top: 1px solid var(--rule); }
+.seg-head { display: grid; gap: 18px; max-width: 900px; }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+  }
+}
+@keyframes rise { from { opacity: .3; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+
+/* Como funciona */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 20px; overflow: hidden; counter-reset: step; }
+@media (max-width: 900px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+.steps li { background: var(--stage); padding: 26px 22px 28px; display: grid; gap: 10px; align-content: start; counter-increment: step; min-width: 0; }
+.steps li::before { content: "0" counter(step); font: 500 12px/1 var(--mono); color: var(--read); letter-spacing: .1em; }
+.steps b { font-family: var(--display); font-size: var(--s-1); font-stretch: 86%; }
+.steps p { color: var(--dim); font-size: 15px; }
+.align-fig { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; align-items: center; }
+@media (max-width: 900px) { .align-fig { grid-template-columns: minmax(0, 1fr); } }
+.align-box { background: var(--panel); border: 1px solid var(--rule); border-radius: 22px; padding: 18px; min-width: 0; }
+.align-box canvas { display: block; width: 100%; height: auto; }
+.legend { display: grid; gap: 14px; }
+.legend div { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; align-items: baseline; font-size: 15px; color: var(--dim); }
+.legend b { font: 500 12px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.k-ok { color: var(--read); } .k-om { color: var(--note); } .k-ex { color: #ff8a80; }
+
+/* Onde o texto aparece */
+.modes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
+@media (max-width: 900px) { .modes { grid-template-columns: minmax(0, 1fr); } }
+.mode-list { display: grid; gap: 6px; }
+.mode-list button { display: grid; gap: 4px; text-align: left; padding: 16px 18px; border-radius: 16px; border: 1px solid transparent; background: transparent; color: var(--dim); cursor: pointer; font: inherit; }
+.mode-list button b { font-family: var(--display); font-size: var(--s-1); font-stretch: 86%; color: var(--text); }
+.mode-list button span { font-size: 15px; }
+.mode-list button em { font: 500 11px/1 var(--mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.mode-list button[aria-pressed="true"] { border-color: var(--rule); background: var(--panel); }
+.mode-list button[aria-pressed="true"] b { color: var(--read); }
+.rig { position: relative; padding-bottom: 6%; min-width: 0; }
+.mon { position: relative; width: 100%; }
+.mon-screen { position: relative; aspect-ratio: 16 / 10; max-width: 100%; border-radius: 14px; border: 10px solid #1f2028; border-top-width: 14px; background: #2b3040; overflow: hidden; transition: transform .8s var(--ease); }
+.mon-stand { width: 22%; height: 26px; margin: 0 auto; background: linear-gradient(#1f2028, #16171d); clip-path: polygon(30% 0, 70% 0, 82% 100%, 18% 100%); }
+.cam { position: absolute; z-index: 5; top: -10px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: #3d404d; box-shadow: 0 0 0 2px #121318; }
+.desk { position: absolute; inset: 0; background: #262b38; }
+.win { position: absolute; border-radius: 6px; background: #3a4152; overflow: hidden; }
+.win::before { content: ""; display: block; height: 10%; background: #4a5266; }
+.win.obs { left: 5%; top: 30%; width: 50%; height: 60%; }
+.win.obs::after { content: "OBS · Programa"; position: absolute; left: 6%; top: 1.5%; font: 500 9px/1 var(--mono); color: #c9cbd6; }
+.win.obs i { position: absolute; left: 6%; right: 6%; top: 20%; bottom: 10%; border-radius: 3px; background: #1a1d26; }
+.win.obs i::after { content: ""; position: absolute; left: 38%; top: 22%; width: 24%; aspect-ratio: 1; border-radius: 50%; background: #5d6478; box-shadow: 0 2.6em 0 1.2em #5d6478; }
+.win.doc { right: 6%; top: 18%; width: 34%; height: 50%; }
+.mp { position: absolute; z-index: 3; background: #050506; overflow: hidden; container-type: size; top: 0; left: 27%; right: 27%; bottom: 74%; border-radius: 0 0 14px 14px; box-shadow: 0 10px 30px #0008;
+  transition: top .8s var(--ease), left .8s var(--ease), right .8s var(--ease), bottom .8s var(--ease), border-radius .8s var(--ease); }
+.mp .pt { transition: transform .8s var(--ease); }
+.mp .pt-text { font-size: 24cqh; line-height: 1.3; padding: 0 5cqw; transition: font-size .8s var(--ease); }
+.mon[data-step="1"] .mp { top: 40%; left: 50%; right: 5%; bottom: 8%; border-radius: 10px; }
+.mon[data-step="1"] .mp .pt-text { font-size: 11cqh; }
+.mon[data-step="2"] .mp, .mon[data-step="3"] .mp { top: 0; left: 0; right: 0; bottom: 0; border-radius: 0; }
+.mon[data-step="2"] .mp .pt-text, .mon[data-step="3"] .mp .pt-text { font-size: 9cqh; padding: 0 12cqw; }
+.mon[data-step="2"] .mp .pt, .mon[data-step="3"] .mp .pt { transform: scaleX(-1); }
+.mp-label { position: absolute; z-index: 4; right: 3%; bottom: 4%; font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--read); opacity: 0; transition: opacity .5s; }
+.mon[data-step="2"] .mp-label, .mon[data-step="3"] .mp-label { opacity: .85; }
+.mon-2 { position: absolute; z-index: 6; width: 46%; right: 0; bottom: 0; opacity: 0; transform: translateX(6%) scale(.92); pointer-events: none; transition: opacity .7s var(--ease), transform .8s var(--ease); }
+.mon-2 .mon-screen { background: #050506; }
+.mon-2 .mp2 { position: absolute; inset: 0; container-type: size; }
+.mon-2 .pt { transform: scaleX(-1); }
+.mon-2 .pt-text { font-size: 11cqh; line-height: 1.3; padding: 0 8cqw; }
+.rig[data-step="3"] .mon-2 { opacity: 1; transform: none; }
+.rig[data-step="3"] .mon:first-child .mon-screen { transform: translateX(-6%) scale(.94); }
+.mp .pt, .mp2 .pt { -webkit-mask-image: linear-gradient(#0000 0, #000 18%, #000 78%, #0000 100%); mask-image: linear-gradient(#0000 0, #000 18%, #000 78%, #0000 100%); }
+
+/* Roteiro e OBS */
+.studio { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; }
+@media (max-width: 900px) { .studio { grid-template-columns: minmax(0, 1fr); } }
+.file { background: var(--panel); border: 1px solid var(--rule); border-radius: 20px; overflow: hidden; min-width: 0; }
+.file-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--rule); font: 500 12px/1 var(--mono); color: var(--dim); }
+.file-head .dots { display: inline-flex; gap: 6px; }
+.file-head .dots i { width: 9px; height: 9px; border-radius: 50%; background: #2f313c; }
+.script { list-style: none; margin: 0; padding: 14px 0; font: 400 14px/1.6 var(--mono); counter-reset: ln; }
+.script li { position: relative; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 3px 16px 3px 0; counter-increment: ln; transition: background .3s; }
+.script li::before { content: counter(ln); text-align: right; color: var(--faint); }
+.script li.on { background: #ffd60a14; }
+.script li.on::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--read); }
+.script li.done { color: var(--dim); }
+.script .k-h { color: var(--read); }
+.script .k-n { color: var(--note); font-style: italic; }
+.script .k-a { color: #b8a6ff; }
+.obs { display: grid; gap: 12px; min-width: 0; }
+.obs-head { display: flex; align-items: center; gap: 10px; font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.tally { width: 10px; height: 10px; border-radius: 50%; background: var(--tally); box-shadow: 0 0 0 4px #ff453a33; }
+@media (prefers-reduced-motion: no-preference) { .tally { animation: blink 1.6s steps(1) infinite; } }
+@keyframes blink { 50% { opacity: .35; } }
+.obs-head b { margin-left: auto; color: var(--text); }
+.program { position: relative; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #171a22; border: 1px solid var(--rule); }
+.program svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.program .who { transition: transform .9s var(--ease); transform-origin: 50% 100%; }
+.program[data-scene="close"] .who { transform: translateY(14%) scale(1.85); }
+.program[data-scene="lado"] .who { transform: translateX(-18%) scale(1.15); }
+.program .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.program .flash.go { animation: cut .32s ease-out; }
+@keyframes cut { 0% { opacity: .55; } 100% { opacity: 0; } }
+.program .lower { position: absolute; left: 4%; bottom: 7%; padding: 6px 10px; border-radius: 6px; background: #000a; font: 500 12px/1 var(--mono); color: var(--text); }
+.recbar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; font: 500 13px/1 var(--mono); color: var(--dim); }
+.recbar .rec { color: var(--tally); }
+.rtrack { position: relative; height: 22px; border-radius: 6px; background: #181920; border: 1px solid var(--rule); overflow: hidden; }
+.rtrack .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: #ff453a22; }
+.rtrack .flag { position: absolute; top: 0; bottom: 0; width: 2px; background: #b8a6ff; }
+.rtrack .flag span { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); font-size: 10px; color: #cfc4ff; white-space: nowrap; }
+.events { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font: 400 13px/1.4 var(--mono); color: var(--dim); min-height: 3.4em; }
+.events li b { color: var(--text); font-weight: 500; }
+.subs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 28px; align-items: center; margin-top: 18px; }
+@media (max-width: 900px) { .subs { grid-template-columns: minmax(0, 1fr); } }
+.srt { margin: 0; padding: 16px 18px; min-height: 236px; font: 400 14px/1.55 var(--mono); color: var(--dim); white-space: pre-wrap; overflow: hidden; }
+.srt .cue { display: block; margin-bottom: 12px; }
+.srt .cue b { color: var(--read); font-weight: 500; }
+.srt .cue span { color: var(--text); }
+@media (prefers-reduced-motion: no-preference) { .srt .cue.new { animation: type .6s steps(24) both; } }
+@keyframes type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+/* Celular */
+.remote { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(28px, 5vw, 72px); align-items: center; }
+@media (max-width: 860px) { .remote { grid-template-columns: minmax(0, 1fr); justify-items: center; } }
+.remote-copy { display: grid; gap: 22px; min-width: 0; justify-self: stretch; }
+.qr { display: flex; align-items: center; gap: 18px; padding: 14px; border: 1px solid var(--rule); border-radius: 20px; max-width: 420px; }
+.qr canvas { width: 112px; height: 112px; border-radius: 10px; background: var(--text); flex: none; }
+.qr p { font-size: 15px; color: var(--dim); }
+.qr p a { color: var(--read); word-break: break-all; }
+.phone { position: relative; width: 300px; max-width: 100%; aspect-ratio: 9 / 19.2; border-radius: 46px; padding: 12px; background: #1d1e25; box-shadow: 0 0 0 1px #34363f inset, 0 40px 80px -30px #000; }
+.phone::before { content: ""; position: absolute; z-index: 3; top: 22px; left: 50%; width: 92px; height: 24px; margin-left: -46px; border-radius: 20px; background: #000; }
+.ph { position: relative; height: 100%; border-radius: 36px; background: #000; overflow: hidden; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto auto; gap: 8px; padding: 50px 12px 18px; }
+.ph-top { display: flex; align-items: center; gap: 8px; font: 700 14px/1 var(--display); }
+.ph-top .logo { width: 22px; height: 22px; }
+.ph-top .dot { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px #30d15833; }
+.ph-status { display: flex; align-items: center; gap: 8px; font: 500 11px/1 var(--mono); color: var(--dim); }
+.ph-chip { padding: 4px 8px; border-radius: 999px; background: #30d15829; color: var(--ok); font-family: var(--body); font-weight: 700; }
+.ph-chip.paused { background: #ffd60a24; color: var(--read); }
+.ph-status .t { margin-left: auto; }
+.ph-pt { border-radius: 16px; background: #111115; -webkit-mask-image: linear-gradient(#0000 0, #000 14%, #000 80%, #0000 100%); mask-image: linear-gradient(#0000 0, #000 14%, #000 80%, #0000 100%); }
+.ph-pt .pt-text { font-size: 19px; line-height: 1.36; padding: 0 12px; }
+.ph-secs { display: flex; gap: 6px; overflow: hidden; }
+.ph-secs button { flex: none; padding: 6px 10px; border-radius: 999px; border: 1px solid transparent; background: #1c1c22; color: var(--text); font: 700 11px/1 var(--body); cursor: pointer; }
+.ph-secs button.cur { border-color: var(--read); color: var(--read); }
+.ph-nav { display: grid; grid-template-columns: 1fr 1fr 1.35fr 1fr 1fr; gap: 6px; }
+.ph-nav button, .ph-tools button { display: grid; place-items: center; gap: 3px; height: 56px; border-radius: 16px; border: 0; background: #1c1c22; color: var(--text); cursor: pointer; font: 700 9.5px/1 var(--body); }
+.ph-nav button span, .ph-tools button span { color: var(--dim); }
+.ph-nav button svg, .ph-tools button svg { width: 18px; height: 18px; }
+.ph-nav .play { background: var(--read); color: var(--read-ink); }
+.ph-nav .play span { color: var(--read-ink); opacity: .75; }
+.ph-nav button:disabled { opacity: .35; cursor: default; }
+.ph-nav button:active, .ph-tools button:active { transform: scale(.95); }
+.ph-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ph-tools button { height: 44px; }
+.ph-tools .stop { color: var(--tally); }
+
+/* Windows e navegador */
+.versions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 760px) { .versions { grid-template-columns: minmax(0, 1fr); } }
+.ver { display: grid; gap: 16px; align-content: start; padding: 28px; border-radius: 22px; border: 1px solid var(--rule); background: var(--panel); min-width: 0; }
+.ver header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.ver header span { font: 500 12px/1 var(--mono); color: var(--faint); }
+.ver ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ver li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; color: var(--dim); }
+.ver li::before { content: "✓"; color: var(--read); font-weight: 700; }
+.ver .btn { justify-self: start; }
+.both { font-size: 15px; color: var(--dim); max-width: 62em; }
+.both b { color: var(--text); }
+.shot { margin: 8px 0 0; display: grid; gap: 12px; }
+.shot .frame { border-radius: 18px; border: 1px solid var(--rule); overflow: hidden; background: var(--panel); }
+.shot .frame-bar { display: flex; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+.shot .frame-bar i { width: 9px; height: 9px; border-radius: 50%; background: #2f313c; }
+.shot img { display: block; width: 100%; height: auto; }
+.shot figcaption { font-size: 14px; color: var(--faint); }
+
+/* Privacidade */
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 20px; overflow: hidden; }
+@media (max-width: 860px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.facts div { background: var(--stage); padding: 24px 22px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.facts b { font-family: var(--display); font-size: var(--s-2); font-stretch: 82%; font-variant-numeric: tabular-nums; line-height: 1; }
+.facts span { font-size: 14px; color: var(--dim); }
+
+/* Fim */
+.final { display: grid; gap: 26px; justify-items: start; padding-block: clamp(64px, 10vw, 140px); border-top: 1px solid var(--rule); }
+.final h2 { font-size: var(--s-4); font-stretch: 78%; letter-spacing: -0.035em; line-height: .94; }
+.final h2 em { font-style: normal; color: var(--read); }
+
+/* Créditos */
+.credits { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: clamp(24px, 4vw, 56px); padding-block: 48px calc(56px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--rule); align-items: start; }
+@media (max-width: 860px) { .credits { grid-template-columns: minmax(0, 1fr); } }
+.author { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: center; padding: 26px 24px; border-radius: 22px; border: 1px solid var(--rule); background: var(--panel); overflow: hidden; }
+.author::before { content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 2px; background: linear-gradient(90deg, var(--read), #ff9f0a); }
+.mono-lfp { width: 72px; height: 72px; border-radius: 20px; display: grid; place-items: center; background: linear-gradient(135deg, var(--read), #ff9f0a); color: var(--read-ink); font: 800 21px/1 var(--display); letter-spacing: .04em; box-shadow: 0 0 50px #ffd60a33; }
+.author small { display: block; font: 500 11px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.author strong { display: block; margin: 4px 0 6px; font: 700 var(--s-1)/1.1 var(--display); font-stretch: 88%; }
+.author a { color: var(--read); text-decoration: none; font-size: 15px; }
+.author a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.colophon { display: grid; gap: 12px; font-size: 14px; color: var(--dim); }
+.colophon p b { color: var(--text); font-weight: 700; }
+.colophon a { color: var(--text); text-underline-offset: 3px; }
+.colophon .made { color: var(--faint); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"><i></i></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo" viewBox="0 0 512 512">
+    <rect x="16" y="16" width="480" height="480" rx="112" fill="#1d1e26"/>
+    <path d="M111 172H281" stroke="#edece6" stroke-width="34" stroke-linecap="round" opacity=".55"/>
+    <path d="M111 256H239" stroke="#ffd60a" stroke-width="34" stroke-linecap="round"/>
+    <path d="M111 340H295" stroke="#edece6" stroke-width="34" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15L19.5 12z" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 5l9 7-9 7zM18 5v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M6 5v14M19 5 9 12l10 7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-restart" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-down-arrow" viewBox="0 0 24 24"><path d="M12 4v13M6 12l6 6 6-6M5 21h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#abertura" aria-label="InPromptu">
+      <svg class="logo" viewBox="0 0 512 512" aria-hidden="true">
+        <use href="#logo"/>
+        <g fill="#ffd60a"><rect class="bar" x="278" y="234" width="26" height="44" rx="13"/><rect class="bar" x="316" y="204" width="26" height="104" rx="13"/><rect class="bar" x="354" y="222" width="26" height="68" rx="13"/><rect class="bar" x="392" y="242" width="26" height="28" rx="13"/></g>
+      </svg>
+      InPromptu
+    </a>
+    <nav class="nav" aria-label="Seções">
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#celular">Celular</a>
+      <a href="#versoes">Windows e web</a>
+      <a class="btn" href="https://github.com/crie-studio/inpromptu/releases/latest">Baixar</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="abertura">
+      <div class="hero-copy">
+        <p class="slug"><span class="tc" data-tc>00:00</span> Abertura <span class="rule"></span></p>
+        <h1 id="headline">O teleprompter que acompanha a sua voz.</h1>
+        <p class="lede">Você lê olhando para a câmera. O InPromptu escuta, destaca cada palavra e sobe o texto no seu ritmo. Se você para, ele espera. Se pula uma frase, ele te reencontra. Tudo roda no seu computador, sem internet.</p>
+        <div class="ctas">
+          <a class="btn primary" href="https://github.com/crie-studio/inpromptu/releases/latest"><svg aria-hidden="true"><use href="#i-down-arrow"/></svg>Baixar para Windows</a>
+          <a class="btn" href="../"><svg aria-hidden="true"><use href="#i-globe"/></svg>Usar no navegador</a>
+        </div>
+        <p class="fine">Grátis · código aberto (MIT) · Windows 10 e 11 · Chrome, Edge, Firefox e Safari</p>
+      </div>
+
+      <div class="prompter" aria-label="Demonstração do teleprompter">
+        <div class="glass">
+          <div class="pt hero-pt" id="pt-hero"><div class="pt-text"></div></div>
+          <div class="readline" aria-hidden="true"></div>
+          <div class="pbar">
+            <canvas id="wave" width="184" height="68" aria-hidden="true"></canvas>
+            <span class="status" id="status" aria-live="polite"></span>
+            <div class="track" aria-hidden="true"><i id="track"></i></div>
+            <span class="time" id="time">0:00 · faltam 0:30</span>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="chip" id="b-play" type="button"><svg aria-hidden="true"><use href="#i-pause"/></svg><span>Pausar</span></button>
+          <button class="chip" id="b-skip" type="button"><svg aria-hidden="true"><use href="#i-skip"/></svg>Pular uma frase</button>
+          <label class="rate" for="rate">Ritmo <input id="rate" type="range" min="1.6" max="4.4" step="0.1" value="2.9"> <output id="rate-out" for="rate">2,9 pal/s</output></label>
+        </div>
+        <details class="mine">
+          <summary>Testar com o meu texto</summary>
+          <label for="mytext" class="caption">Use [colchetes] para notas e # no começo da linha para seções.</label>
+          <textarea id="mytext"></textarea>
+          <button class="btn" id="b-mine" type="button">Ler este texto</button>
+        </details>
+        <p class="caption">Demonstração com uma voz simulada. No app, quem dita o ritmo é você.</p>
+      </div>
+    </section>
+
+    <section class="seg" id="como-funciona">
+      <div class="seg-head reveal">
+        <p class="slug"><span class="tc" data-tc>00:22</span> Como funciona <span class="rule"></span></p>
+        <h2>Ele lê junto com você, palavra por palavra.</h2>
+        <p class="lede">Não é rolagem por volume. O InPromptu sabe qual palavra você está dizendo e onde ela está no roteiro.</p>
+      </div>
+      <ol class="steps reveal">
+        <li><b>Ouve</b><p>Um detector de voz (Silero) separa fala de ruído a cada 32 milissegundos. No silêncio, o texto para.</p></li>
+        <li><b>Reconhece</b><p>O reconhecedor (Vosk) só procura as palavras do seu roteiro. Acerta nomes difíceis e responde em cerca de meio segundo.</p></li>
+        <li><b>Alinha</b><p>A frase ouvida é comparada inteira com o texto. Palavras trocadas, esquecidas ou a mais não tiram você do lugar.</p></li>
+        <li><b>Acompanha</b><p>A posição anda no seu ritmo, que o app aprende e guarda para a próxima leitura.</p></li>
+      </ol>
+      <div class="align-fig reveal">
+        <div class="align-box"><canvas id="align" width="720" height="440" aria-label="Matriz de alinhamento entre o que foi dito e o roteiro"></canvas></div>
+        <div class="legend">
+          <p class="caption">O alinhamento de verdade, com a pontuação do app: em cima, o que o reconhecedor ouviu; à esquerda, o roteiro. O caminho amarelo é onde você está.</p>
+          <div><b class="k-ok">Certa</b><span>"sobe" foi ouvida como "sob". As duas são parecidas o bastante e contam como a mesma palavra.</span></div>
+          <div><b class="k-om">Esquecida</b><span>"e" não foi dita. O roteiro segue em frente sem esperar por ela.</span></div>
+          <div><b class="k-ex">A mais</b><span>"é" foi dita mas não está no roteiro. É ignorada e a posição não se mexe.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="seg" id="onde">
+      <div class="seg-head reveal">
+        <p class="slug"><span class="tc" data-tc>01:04</span> Onde o texto aparece <span class="rule"></span></p>
+        <h2>Perto da câmera, por cima de tudo ou no vidro do teleprompter.</h2>
+      </div>
+      <div class="modes">
+        <div class="mode-list" role="group" aria-label="Modos de exibição">
+          <button type="button" data-step="0" aria-pressed="true"><em>Windows</em><b>Faixa no topo</b><span>Colada no topo da tela, logo abaixo da webcam. Seus olhos parecem olhar para a lente.</span></button>
+          <button type="button" data-step="1" aria-pressed="false"><em>Windows e web</em><b>Janela flutuante</b><span>Sempre por cima dos outros programas, inclusive do OBS.</span></button>
+          <button type="button" data-step="2" aria-pressed="false"><em>Windows e web</em><b>Tela cheia espelhada</b><span>Para o vidro do teleprompter, com a câmera ou o OBS por trás.</span></button>
+          <button type="button" data-step="3" aria-pressed="false"><em>Windows e web</em><b>Segunda tela</b><span>Outra tela cheia, em outro monitor, acompanhando a mesma leitura.</span></button>
+        </div>
+        <div class="rig" id="rig" data-step="0">
+          <div class="mon" id="mon" data-step="0">
+            <div class="mon-screen">
+              <div class="desk"><div class="win obs"><i></i></div><div class="win doc"></div></div>
+              <div class="mp"><div class="pt" id="pt-mini"><div class="pt-text"></div></div></div>
+              <span class="mp-label">espelhado</span>
+              <span class="cam" aria-hidden="true"></span>
+            </div>
+            <div class="mon-stand"></div>
+          </div>
+          <div class="mon mon-2" aria-hidden="true">
+            <div class="mon-screen"><div class="mp2"><div class="pt" id="pt-mirror"><div class="pt-text"></div></div></div></div>
+            <div class="mon-stand"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="seg" id="estudio">
+      <div class="seg-head reveal">
+        <p class="slug"><span class="tc" data-tc>01:33</span> O roteiro dirige o estúdio <span class="rule"></span></p>
+        <h2>Escreva a direção no texto. O OBS obedece.</h2>
+        <p class="lede">Notas entre colchetes aparecem para você e não são lidas. Com o OBS conectado, a leitura começa a gravação, troca de cena e marca capítulos sozinha.</p>
+      </div>
+      <div class="studio reveal">
+        <div class="file">
+          <div class="file-head"><span class="dots"><i></i><i></i><i></i></span>episodio-12.inpromptu</div>
+          <ol class="script" id="obs-script"></ol>
+        </div>
+        <div class="obs">
+          <div class="obs-head"><span class="tally" aria-hidden="true"></span>OBS · Programa<b id="obs-scene">Geral</b></div>
+          <div class="program" id="program" data-scene="geral">
+            <svg viewBox="0 0 160 90" aria-hidden="true">
+              <rect width="160" height="90" fill="#171a22"/>
+              <path d="M0 64h160v26H0z" fill="#1d212b"/>
+              <rect x="20" y="20" width="26" height="40" rx="3" fill="#232836"/>
+              <rect x="118" y="16" width="22" height="48" rx="3" fill="#232836"/>
+              <g class="who"><circle cx="80" cy="44" r="10" fill="#4e5568"/><path d="M60 78c0-12 9-20 20-20s20 8 20 20z" fill="#4e5568"/></g>
+              <path d="M53 0v90M107 0v90M0 30h160M0 60h160" stroke="#ffffff10" stroke-width=".4"/>
+            </svg>
+            <div class="flash" id="flash"></div>
+            <span class="lower" id="lower">Câmera 1 · Geral</span>
+          </div>
+          <div class="recbar"><span><span class="rec">● REC</span> <span id="rec-time">00:00:00</span></span><div class="rtrack" id="rtrack"><div class="fill" id="rfill"></div></div></div>
+          <ul class="events" id="events" aria-live="polite"></ul>
+        </div>
+      </div>
+      <div class="subs reveal">
+        <div class="seg-head">
+          <h3>E as legendas saem prontas.</h3>
+          <p class="lede">Cada palavra fica registrada no instante em que você a disse. No fim, o arquivo .srt está pronto para o editor de vídeo, com o mesmo nome da gravação.</p>
+        </div>
+        <div class="file">
+          <div class="file-head"><span class="dots"><i></i><i></i><i></i></span>legendas.srt <span style="margin-left:auto;color:var(--faint)">ao vivo, da demonstração lá de cima</span></div>
+          <pre class="srt" id="srt"><span class="cue"><b>1</b>
+<b>00:00:00,620 --> 00:00:02,980</b>
+<span>Oi! Eu sou o InPromptu.</span></span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="seg" id="celular">
+      <div class="remote">
+        <div class="remote-copy">
+          <div class="seg-head reveal">
+            <p class="slug"><span class="tc" data-tc>02:13</span> Celular <span class="rule"></span></p>
+            <h2>O controle remoto é o seu celular.</h2>
+            <p class="lede">Aponte a câmera para o QR code e acompanhe a leitura pelo navegador do celular, sem instalar nada. Pausar, voltar uma linha, pular para uma seção, mudar a velocidade: está tudo ali.</p>
+            <p class="lede">No app de Windows, pela rede Wi-Fi. Na versão web, pela internet, em qualquer rede.</p>
+          </div>
+          <p class="caption">Este celular funciona: os botões controlam a demonstração lá do começo da página.</p>
+          <div class="qr">
+            <canvas id="qr" width="224" height="224" aria-label="QR code da versão web"></canvas>
+            <p>Abra a versão web no celular:<br><a href="../">crie-studio.github.io/inpromptu</a></p>
+          </div>
+        </div>
+        <div class="phone" aria-label="Controle pelo celular (demonstração)">
+          <div class="ph">
+            <div class="ph-top"><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><use href="#logo"/><g fill="#ffd60a"><rect x="278" y="234" width="26" height="44" rx="13"/><rect x="316" y="204" width="26" height="104" rx="13"/><rect x="354" y="222" width="26" height="68" rx="13"/><rect x="392" y="242" width="26" height="28" rx="13"/></g></svg>InPromptu<span class="dot" title="Conectado"></span></div>
+            <div class="ph-status"><span class="ph-chip" id="ph-chip">Lendo</span><span>Página 1/1</span><span class="t" id="ph-time">0:00</span></div>
+            <div class="pt ph-pt" id="pt-phone"><div class="pt-text"></div></div>
+            <div class="ph-secs" id="ph-secs"></div>
+            <div class="ph-nav">
+              <button type="button" disabled aria-label="Página anterior"><svg aria-hidden="true"><use href="#i-prev"/></svg><span>Anterior</span></button>
+              <button type="button" id="ph-up" aria-label="Voltar uma linha"><svg aria-hidden="true"><use href="#i-up"/></svg><span>Linha</span></button>
+              <button type="button" class="play" id="ph-play" aria-label="Pausar ou continuar"><svg aria-hidden="true"><use href="#i-pause"/></svg><span>Pausar</span></button>
+              <button type="button" id="ph-down" aria-label="Avançar uma linha"><svg aria-hidden="true"><use href="#i-down"/></svg><span>Linha</span></button>
+              <button type="button" disabled aria-label="Próxima página"><svg aria-hidden="true"><use href="#i-next"/></svg><span>Próxima</span></button>
+            </div>
+            <div class="ph-tools">
+              <button type="button" class="stop" id="ph-stop"><svg aria-hidden="true"><use href="#i-stop"/></svg><span>Parar</span></button>
+              <button type="button" id="ph-restart"><svg aria-hidden="true"><use href="#i-restart"/></svg><span>Do início</span></button>
+              <button type="button" id="ph-faster"><span style="font-size:15px;color:var(--text)">+</span><span>Mais rápido</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="seg" id="versoes">
+      <div class="seg-head reveal">
+        <p class="slug"><span class="tc" data-tc>02:49</span> Windows e web <span class="rule"></span></p>
+        <h2>Instale no Windows ou abra no navegador.</h2>
+      </div>
+      <div class="versions reveal">
+        <article class="ver">
+          <header><h3>Windows</h3><span>instalador · 123 MB</span></header>
+          <ul>
+            <li>A faixa no topo da tela, perto da câmera</li>
+            <li>Escondido das gravações e do compartilhamento de tela (Teams, Zoom, Meet, OBS)</li>
+            <li>Atalhos que funcionam com outro programa na frente</li>
+            <li>Celular pela rede Wi-Fi</li>
+          </ul>
+          <a class="btn primary" href="https://github.com/crie-studio/inpromptu/releases/latest"><svg aria-hidden="true"><use href="#i-down-arrow"/></svg>Baixar para Windows</a>
+        </article>
+        <article class="ver">
+          <header><h3>Navegador</h3><span>Chrome · Edge · Firefox · Safari</span></header>
+          <ul>
+            <li>Nada para instalar; pode virar um app pelo navegador</li>
+            <li>Janela flutuante por cima de tudo (Chrome e Edge)</li>
+            <li>Celular pela internet, em qualquer rede</li>
+            <li>Funciona sem internet depois da primeira visita</li>
+          </ul>
+          <a class="btn" href="../"><svg aria-hidden="true"><use href="#i-globe"/></svg>Usar no navegador</a>
+        </article>
+      </div>
+      <p class="both reveal"><b>Nos dois:</b> rastreamento de voz offline, modo clássico e ativado por voz, tela cheia espelhada, câmera no fundo, segunda tela, contagem 3-2-1, cronômetro com meta, notas e seções, OBS, legendas .srt e arquivos .inpromptu, .txt, .md e .pptx.</p>
+      <figure class="shot reveal">
+        <div class="frame"><div class="frame-bar" aria-hidden="true"><i></i><i></i><i></i></div><img src="editor.png" alt="O editor do InPromptu: páginas à esquerda, o roteiro no centro e as configurações de leitura à direita" width="2334" height="1450" loading="lazy"></div>
+        <figcaption>O editor: as páginas à esquerda, o roteiro no centro e o modo de leitura à direita.</figcaption>
+      </figure>
+    </section>
+
+    <section class="seg" id="privacidade">
+      <div class="seg-head reveal">
+        <p class="slug"><span class="tc" data-tc>03:31</span> Privacidade <span class="rule"></span></p>
+        <h2>Sua voz não sai do seu computador.</h2>
+        <p class="lede">O reconhecimento roda no seu processador. O modelo de voz é baixado uma vez e depois tudo funciona sem internet. Não há conta, telemetria nem estatística de uso, e o código é aberto para quem quiser conferir.</p>
+      </div>
+      <div class="facts reveal">
+        <div><b class="mono">31 MB</b><span>o modelo de voz em português, baixado uma única vez</span></div>
+        <div><b class="mono">≈0,5 s</b><span>do que você diz até a palavra acender</span></div>
+        <div><b class="mono">32 ms</b><span>a janela do detector de voz</span></div>
+        <div><b class="mono">0 B</b><span>de áudio enviado para qualquer servidor</span></div>
+      </div>
+    </section>
+
+    <section class="final" id="baixar">
+      <p class="slug"><span class="tc" data-tc>03:58</span> Encerramento <span class="rule"></span></p>
+      <h2>Grave a próxima tomada <em>olhando para a câmera.</em></h2>
+      <div class="ctas">
+        <a class="btn primary" href="https://github.com/crie-studio/inpromptu/releases/latest"><svg aria-hidden="true"><use href="#i-down-arrow"/></svg>Baixar para Windows</a>
+        <a class="btn" href="../"><svg aria-hidden="true"><use href="#i-globe"/></svg>Usar no navegador</a>
+        <a class="btn" href="https://github.com/crie-studio/inpromptu">Código no GitHub</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="credits" id="creditos">
+    <div class="author">
+      <div class="mono-lfp" aria-hidden="true">LFP</div>
+      <div>
+        <small>Criado e desenvolvido por</small>
+        <strong>Luiz Felipe Pitzer</strong>
+        <a href="https://lfp.app.br">lfp.app.br ↗</a>
+      </div>
+    </div>
+    <div class="colophon">
+      <p><b>InPromptu 2.1.0</b> · código aberto, licença MIT · <a href="https://github.com/crie-studio/inpromptu">github.com/crie-studio/inpromptu</a></p>
+      <p>Feito com <a href="https://alphacephei.com/vosk/">Vosk</a> e <a href="https://github.com/ccoreilly/vosk-browser">vosk-browser</a> (Apache 2.0), <a href="https://github.com/snakers4/silero-vad">Silero VAD</a> e <a href="https://onnxruntime.ai">ONNX Runtime</a> (MIT), <a href="https://peerjs.com">PeerJS</a> e <a href="https://www.electronjs.org">Electron</a> (MIT) e a fonte OpenDyslexic (SIL OFL).</p>
+      <p>A ideia da faixa perto da câmera veio do <a href="https://github.com/f/textream">Textream</a>, de Fatih Kadir Akın.</p>
+      <p class="made">Esta página foi escrita com Claude Opus 5.5, da Anthropic. © 2026 Luiz Felipe Pitzer.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script>
+(() => {
+  'use strict';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const fmt = (s) => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const num = (n) => String(Math.round(n * 10) / 10).replace('.', ',');
+
+  /* ───────── Roteiro: as mesmas regras do app (notas e seções não são lidas) ───────── */
+  const DEMO = `# Abertura
+Oi! Eu sou o InPromptu. [sorria] Enquanto você fala, eu destaco cada palavra e subo o texto no seu ritmo.
+
+Se você parar para pensar, eu espero. Se pular uma frase, eu te reencontro.
+
+# No estúdio
+[cena: Close] O reconhecimento roda no seu computador, sem internet. Nenhum áudio sai da sua máquina.
+
+Quando você terminar, as legendas já estão prontas.`;
+
+  function tokenize(src) {
+    const out = [];
+    for (const raw of String(src).replace(/\r\n?/g, '\n').split('\n')) {
+      const line = raw.trim();
+      if (!line) {
+        if (out.length) out[out.length - 1].gap = true;
+        continue;
+      }
+      if (line.startsWith('#')) {
+        out.push({ text: line.replace(/^#+\s*/, ''), kind: 'h', br: true });
+        continue;
+      }
+      for (const p of line.match(/\[[^\]]*\]?|[^\s[]+/g) || []) {
+        if (p.startsWith('[')) {
+          const m = /^\[\s*(cena|cap[ií]tulo)\s*:/i.exec(p);
+          out.push({ text: p, kind: 'n', act: !!m });
+        } else out.push({ text: p, kind: 'w' });
+      }
+      if (out.length) out[out.length - 1].br = true;
+    }
+    return out;
+  }
+
+  /* ───────── A "voz": quando cada palavra é dita, no ritmo escolhido ───────── */
+  class Voice {
+    constructor() { this.rate = 2.9; this.playing = !reduce; this.t = 0; this.wait = 0; }
+    load(tokens) { this.tokens = tokens; this.t = 0; this.wait = 0; this.build(); }
+    build() {
+      const k = 2.9 / this.rate;
+      let t = 0.6 * k;
+      this.sched = [];
+      this.tokens.forEach((tok, i) => {
+        if (tok.kind !== 'w') return;
+        const d = (0.17 + 0.05 * tok.text.length) * k;
+        this.sched.push({ i, start: t, end: t + d });
+        t += d + 0.06 * k;
+        if (/[.!?]$/.test(tok.text)) t += 0.5 * k;
+        else if (/[,;:]$/.test(tok.text)) t += 0.22 * k;
+        if (tok.gap) t += 0.4 * k;
+      });
+      this.total = t + 0.4;
+    }
+    /** Posição em índice de palavra do roteiro (com fração dentro da palavra). */
+    position() {
+      const s = this.sched;
+      if (!s.length) return 0;
+      if (this.t <= s[0].start) return s[0].i;
+      for (let k = 0; k < s.length; k++) {
+        const w = s[k];
+        if (this.t < w.end) return this.t >= w.start ? w.i + (this.t - w.start) / (w.end - w.start) * 0.98 : w.i;
+        if (k === s.length - 1 || this.t < s[k + 1].start) return k === s.length - 1 ? this.tokens.length : s[k + 1].i;
+      }
+      return this.tokens.length;
+    }
+    speaking() { return this.sched.some((w) => this.t >= w.start && this.t < w.end); }
+    seekIndex(i) {
+      const w = this.sched.find((x) => x.i >= i) || this.sched[this.sched.length - 1];
+      if (w) this.t = w.start;
+    }
+    setRate(r) {
+      const pos = Math.floor(this.position());
+      this.rate = r;
+      this.build();
+      this.seekIndex(pos);
+    }
+    /** Pula para o começo da próxima frase. Devolve as palavras puladas (não entram nas legendas). */
+    skipSentence() {
+      const pos = this.position();
+      const s = this.sched;
+      let k = s.findIndex((w) => w.i >= pos);
+      if (k < 0) return [];
+      for (; k < s.length - 1; k++) if (/[.!?]$/.test(this.tokens[s[k].i].text)) break;
+      const next = s[k + 1];
+      if (!next) return [];
+      const skipped = s.filter((w) => w.i >= pos && w.i < next.i).map((w) => w.i);
+      this.t = next.start;
+      return skipped;
+    }
+    update(dt) {
+      if (!this.playing) return;
+      if (this.wait > 0) {
+        this.wait -= dt;
+        if (this.wait <= 0) { this.t = 0; this.onLoop?.(); }
+        return;
+      }
+      this.t += dt;
+      if (this.t >= this.total) this.wait = 2.2;
+    }
+  }
+
+  /* ───────── O leitor: a posição estimada, como no app (suave, nunca volta sozinha) ───────── */
+  class Reader {
+    constructor(voice) { this.voice = voice; this.reset(); }
+    reset() { this.est = 0; this.searching = 0; this.fast = 0; this.times = new Map(); this.skipped = new Set(); this.lastWord = -1; }
+    update(dt) {
+      const target = this.voice.position();
+      if (target < this.est - 1.5) { this.est = target; this.lastWord = Math.floor(target) - 1; }
+      const diff = target - this.est;
+      if (diff > 5 && this.searching <= 0 && this.fast <= 0) this.searching = 0.75; // pulou: um instante para reencontrar
+      if (this.searching > 0) {
+        this.searching -= dt;
+        if (this.searching <= 0) this.fast = 0.5;
+        return;
+      }
+      if (this.fast > 0) this.fast -= dt;
+      if (diff > 0) this.est += diff * (1 - Math.exp(-dt / (this.fast > 0 ? 0.07 : 0.16)));
+      const cur = Math.floor(this.est);
+      for (let i = this.lastWord + 1; i < cur && i < this.voice.tokens.length; i++) {
+        const w = this.voice.sched.find((x) => x.i === i);
+        if (w && !this.skipped.has(i)) this.times.set(i, w.end);
+        this.lastWord = i;
+      }
+    }
+  }
+
+  /* ───────── Uma vista do teleprompter (a demo, o monitor, o vidro, o celular) ───────── */
+  class Prompter {
+    constructor(el, anchor) {
+      this.el = el;
+      this.text = $('.pt-text', el);
+      this.anchor = anchor;
+      this.y = 0;
+      this.cur = -2;
+      this.visible = true;
+      new ResizeObserver(() => this.layout()).observe(this.text);
+      new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; }).observe(el);
+    }
+    render(tokens) {
+      this.text.replaceChildren();
+      this.spans = tokens.map((tok) => {
+        const s = document.createElement('span');
+        s.className = tok.kind === 'w' ? 'w' : tok.kind === 'n' ? `n${tok.act ? ' act' : ''}` : 'h';
+        s.textContent = tok.text;
+        this.text.appendChild(s);
+        if (tok.gap) { const g = document.createElement('span'); g.className = 'gap'; this.text.appendChild(g); }
+        else if (tok.br) this.text.appendChild(document.createElement('br'));
+        else this.text.appendChild(document.createTextNode(' '));
+        return s;
+      });
+      this.kinds = tokens.map((t) => t.kind);
+      this.cur = -2;
+      this.layout();
+    }
+    layout() {
+      if (!this.spans) return;
+      this.mid = this.spans.map((s) => s.offsetTop + s.offsetHeight / 2);
+      this.snap = true;
+    }
+    update(est, dt) {
+      if (!this.spans || !this.visible) return;
+      const n = this.spans.length;
+      const cur = Math.min(Math.floor(est), n);
+      if (cur !== this.cur) {
+        for (let i = 0; i < n; i++) {
+          const base = this.kinds[i] === 'w' ? 'w' : this.spans[i].className.replace(/\s?\b[rc]\b/g, '');
+          const st = i < cur ? ' r' : i === cur && this.kinds[i] === 'w' ? ' c' : '';
+          const next = (this.kinds[i] === 'w' ? 'w' : base) + st;
+          if (this.spans[i].className !== next) this.spans[i].className = next;
+        }
+        this.cur = cur;
+      }
+      const a = this.mid[Math.min(cur, n - 1)] ?? 0;
+      const b = this.mid[Math.min(cur + 1, n - 1)] ?? a;
+      const line = a + (b - a) * Math.max(0, Math.min(1, est - cur));
+      const target = this.el.clientHeight * this.anchor - line;
+      this.y = this.snap ? target : this.y + (target - this.y) * (1 - Math.exp(-dt / 0.14));
+      this.snap = false;
+      this.text.style.transform = `translateY(${this.y.toFixed(1)}px)`;
+    }
+  }
+
+  /* ───────── Montagem ───────── */
+  const voice = new Voice();
+  const reader = new Reader(voice);
+  const views = [
+    new Prompter($('#pt-hero'), 0.36),
+    new Prompter($('#pt-mini'), 0.4),
+    new Prompter($('#pt-mirror'), 0.4),
+    new Prompter($('#pt-phone'), 0.32),
+  ];
+  let tokens = [];
+  function loadScript(src) {
+    tokens = tokenize(src);
+    if (!tokens.some((t) => t.kind === 'w')) tokens = tokenize(DEMO);
+    voice.load(tokens);
+    reader.reset();
+    for (const v of views) v.render(tokens);
+    renderSections();
+    srtCount = -1;
+  }
+  voice.onLoop = () => { reader.reset(); srtCount = -1; };
+  document.fonts?.ready.then(() => views.forEach((v) => v.layout()));
+
+  /* Barra do teleprompter: onda da voz, progresso, tempo e o "reencontrando" */
+  const wave = $('#wave');
+  const wctx = wave.getContext('2d');
+  const levels = new Array(22).fill(0.05);
+  let levelClock = 0;
+  function drawWave(dt) {
+    levelClock += dt;
+    if (levelClock > 0.05) {
+      levelClock = 0;
+      const t = voice.t;
+      const lv = voice.playing && voice.speaking() ? 0.32 + 0.68 * Math.abs(Math.sin(t * 21) * Math.sin(t * 6.7 + 1.3)) : 0.05 + Math.random() * 0.04;
+      levels.push(lv);
+      levels.shift();
+    }
+    const { width: w, height: h } = wave;
+    wctx.clearRect(0, 0, w, h);
+    const bw = w / levels.length;
+    const live = voice.playing && voice.speaking();
+    wctx.fillStyle = live ? '#ffd60a' : 'rgba(237,236,230,.4)';
+    levels.forEach((v, i) => {
+      const bh = Math.max(4, v * h * 0.92);
+      wctx.globalAlpha = 0.3 + 0.7 * (i / levels.length);
+      wctx.beginPath();
+      wctx.roundRect(i * bw + bw * 0.2, (h - bh) / 2, bw * 0.6, bh, bw * 0.3);
+      wctx.fill();
+    });
+    wctx.globalAlpha = 1;
+  }
+
+  function remainingSeconds() {
+    let left = 0;
+    for (let i = Math.ceil(reader.est); i < tokens.length; i++) if (tokens[i].kind === 'w') left++;
+    return left / voice.rate;
+  }
+
+  const statusEl = $('#status');
+  const timeEl = $('#time');
+  const trackEl = $('#track');
+  let uiClock = 0;
+  function updateBar(dt) {
+    uiClock += dt;
+    if (uiClock < 0.12) return;
+    uiClock = 0;
+    const words = tokens.filter((t) => t.kind === 'w').length || 1;
+    const done = tokens.slice(0, Math.floor(reader.est)).filter((t) => t.kind === 'w').length;
+    trackEl.style.width = `${Math.min(100, (done / words) * 100)}%`;
+    timeEl.textContent = `${fmt(voice.t)} · faltam ${fmt(remainingSeconds())}`;
+    statusEl.textContent = reader.searching > 0 ? 'Reencontrando…' : !voice.playing ? 'Pausado' : '';
+    phoneUi();
+  }
+
+  /* Controles da demonstração */
+  const playBtn = $('#b-play');
+  function setPlaying(on) {
+    voice.playing = on;
+    for (const [btn, label] of [[playBtn, on ? 'Pausar' : 'Continuar'], [$('#ph-play'), on ? 'Pausar' : 'Continuar']]) {
+      $('use', btn).setAttribute('href', on ? '#i-pause' : '#i-play');
+      $('span', btn).textContent = label;
+    }
+  }
+  playBtn.addEventListener('click', () => setPlaying(!voice.playing));
+  $('#b-skip').addEventListener('click', () => {
+    if (!voice.playing) setPlaying(true);
+    for (const i of voice.skipSentence()) reader.skipped.add(i);
+  });
+  const rateIn = $('#rate');
+  const rateOut = $('#rate-out');
+  function setRate(r) {
+    r = Math.min(4.4, Math.max(1.6, Math.round(r * 10) / 10));
+    voice.setRate(r);
+    rateIn.value = r;
+    rateOut.textContent = `${num(r)} pal/s`;
+  }
+  rateIn.addEventListener('input', () => setRate(Number(rateIn.value)));
+  const mine = $('#mytext');
+  mine.value = DEMO;
+  $('#b-mine').addEventListener('click', () => {
+    loadScript(mine.value);
+    setPlaying(true);
+    $('#pt-hero').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+  });
+
+  /* ───────── Celular (controla a mesma leitura) ───────── */
+  const phChip = $('#ph-chip');
+  const phTime = $('#ph-time');
+  const secsEl = $('#ph-secs');
+  function renderSections() {
+    secsEl.replaceChildren(...tokens.map((t, i) => [t, i]).filter(([t]) => t.kind === 'h').map(([t, i], n) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = `${n + 1} ${t.text}`;
+      b.dataset.index = i;
+      b.addEventListener('click', () => { voice.seekIndex(i + 1); reader.est = i; reader.lastWord = i; });
+      return b;
+    }));
+  }
+  function phoneUi() {
+    phChip.textContent = voice.playing ? 'Lendo' : 'Pausado';
+    phChip.classList.toggle('paused', !voice.playing);
+    phTime.textContent = `${fmt(voice.t)} · faltam ${fmt(remainingSeconds())}`;
+    let cur = -1;
+    $$('button', secsEl).forEach((b, n) => { if (Number(b.dataset.index) <= reader.est) cur = n; });
+    $$('button', secsEl).forEach((b, n) => b.classList.toggle('cur', n === cur));
+  }
+  $('#ph-play').addEventListener('click', () => setPlaying(!voice.playing));
+  $('#ph-restart').addEventListener('click', () => { voice.t = 0; voice.wait = 0; reader.reset(); srtCount = -1; setPlaying(true); });
+  $('#ph-stop').addEventListener('click', () => { voice.t = 0; reader.reset(); srtCount = -1; setPlaying(false); });
+  $('#ph-faster').addEventListener('click', () => setRate(voice.rate >= 4.4 ? 2.9 : voice.rate + 0.3));
+  const moveLine = (dir) => {
+    const target = Math.max(0, Math.min(tokens.length - 1, Math.floor(reader.est) + dir * 7));
+    voice.seekIndex(target);
+    reader.est = target;
+    reader.lastWord = target - 1;
+  };
+  $('#ph-up').addEventListener('click', () => moveLine(-1));
+  $('#ph-down').addEventListener('click', () => moveLine(1));
+
+  /* ───────── Legendas .srt montadas ao vivo (mesmas regras do app: 42 caracteres, 2 linhas) ───────── */
+  const srtEl = $('#srt');
+  let srtCount = -1;
+  let srtClock = 0;
+  const stamp = (s) => {
+    const ms = Math.max(0, Math.round(s * 1000));
+    const p = (n, l = 2) => String(n).padStart(l, '0');
+    return `${p(Math.floor(ms / 3600000))}:${p(Math.floor(ms / 60000) % 60)}:${p(Math.floor(ms / 1000) % 60)},${p(ms % 1000, 3)}`;
+  };
+  function cues() {
+    const words = [...reader.times.entries()].sort((a, b) => a[0] - b[0]).map(([i, t]) => ({ text: tokens[i].text, t }));
+    const out = [];
+    let cur = [];
+    const flush = () => { if (cur.length) out.push(cur); cur = []; };
+    for (const w of words) {
+      const chars = cur.reduce((n, x) => n + x.text.length + 1, 0);
+      if (cur.length && (chars + w.text.length > 84 || w.t - cur[0].t > 6)) flush();
+      cur.push(w);
+      if (/[.!?]$/.test(w.text) || (/[,;:]$/.test(w.text) && chars > 30)) flush();
+    }
+    flush();
+    return out.map((ws) => {
+      const words2 = ws.map((w) => w.text);
+      let line1 = '';
+      let rest = [];
+      for (const w of words2) { if (!rest.length && (line1 + ' ' + w).trim().length <= 42) line1 = (line1 + ' ' + w).trim(); else rest.push(w); }
+      const start = Math.max(0, ws[0].t - Math.min(0.9, Math.max(0.2, ws[0].text.length * 0.07)));
+      return { start, end: ws[ws.length - 1].t + 0.35, text: rest.length ? `${line1}\n${rest.join(' ')}` : line1 };
+    });
+  }
+  function updateSrt(dt) {
+    srtClock += dt;
+    if (srtClock < 0.3) return;
+    srtClock = 0;
+    const list = cues();
+    if (list.length === srtCount) return;
+    const fresh = list.length > srtCount && srtCount >= 0;
+    srtCount = list.length;
+    if (!list.length) return;
+    const show = list.slice(-4);
+    const offset = list.length - show.length;
+    srtEl.replaceChildren(...show.map((c, k) => {
+      const el = document.createElement('span');
+      el.className = `cue${fresh && k === show.length - 1 ? ' new' : ''}`;
+      const n = document.createElement('b');
+      n.textContent = `${offset + k + 1}\n${stamp(c.start)} --> ${stamp(c.end)}\n`;
+      const tx = document.createElement('span');
+      tx.textContent = c.text;
+      el.append(n, tx);
+      return el;
+    }));
+  }
+
+  /* ───────── Alinhamento: a matriz de verdade (programação dinâmica, como no app) ───────── */
+  const SCRIPT = 'o texto sobe no seu ritmo e para quando você para'.split(' ');
+  const HEARD = 'o texto sob no seu ritmo para quando você é para'.split(' ');
+  function lev(a, b) {
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) {
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    return d[a.length][b.length];
+  }
+  const simil = (a, b) => 1 - lev(a, b) / Math.max(a.length, b.length);
+  function alignWords(S, H) {
+    const n = S.length, m = H.length;
+    const M = Array.from({ length: n + 1 }, () => new Float32Array(m + 1));
+    const P = Array.from({ length: n + 1 }, () => new Uint8Array(m + 1));
+    let best = 0, bi = 0, bj = 0;
+    for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++) {
+      const s = simil(S[i - 1], H[j - 1]);
+      const diag = M[i - 1][j - 1] + (s >= 0.75 ? 2 * s : -1);
+      const up = M[i - 1][j] - 0.4;   // palavra do roteiro que não foi dita
+      const left = M[i][j - 1] - 1;   // palavra dita fora do roteiro
+      let v = 0, p = 0;
+      if (diag > v) { v = diag; p = 1; }
+      if (up > v) { v = up; p = 2; }
+      if (left > v) { v = left; p = 3; }
+      M[i][j] = v; P[i][j] = p;
+      if (v >= best) { best = v; bi = i; bj = j; }
+    }
+    const path = [];
+    let i = bi, j = bj;
+    while (i > 0 && j > 0 && P[i][j]) {
+      const p = P[i][j];
+      path.push({ i, j, p, ok: p === 1 && simil(S[i - 1], H[j - 1]) >= 0.75 });
+      if (p === 1) { i--; j--; } else if (p === 2) i--; else j--;
+    }
+    return { M, best, path: path.reverse() };
+  }
+  const AL = alignWords(SCRIPT, HEARD);
+  const omitted = new Set(AL.path.filter((s) => s.p === 2).map((s) => s.i - 1));
+  const extra = new Set(AL.path.filter((s) => s.p === 3).map((s) => s.j - 1));
+  const alCanvas = $('#align');
+  const actx = alCanvas.getContext('2d');
+  let alT = reduce ? 99 : 0;
+  let alVisible = false;
+  new IntersectionObserver(([e]) => { alVisible = e.isIntersecting; }).observe(alCanvas);
+  function sizeAlign() {
+    const w = alCanvas.clientWidth || 600;
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    const h = Math.round(w * 0.62);
+    alCanvas.width = Math.round(w * dpr);
+    alCanvas.height = Math.round(h * dpr);
+    alCanvas.style.height = `${h}px`;
+    actx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawAlign(true);
+  }
+  new ResizeObserver(sizeAlign).observe(alCanvas);
+  function drawAlign(force) {
+    if (!alVisible && !force) return;
+    const W = alCanvas.clientWidth, H = alCanvas.clientHeight;
+    const n = SCRIPT.length, m = HEARD.length;
+    const small = W < 460;
+    const labelW = small ? 64 : 92;
+    const headH = small ? 54 : 72;
+    const cell = Math.min((W - labelW - 6) / m, (H - headH - 6) / n);
+    const x0 = labelW, y0 = headH;
+    actx.clearRect(0, 0, W, H);
+    const fillUntil = Math.min(1, alT / 2.4) * (n + m);
+    const pathUntil = Math.max(0, Math.min(1, (alT - 2.4) / 1.4)) * AL.path.length;
+    const fs = small ? 10 : 12;
+    actx.font = `500 ${fs}px "IBM Plex Mono", ui-monospace, monospace`;
+    actx.textBaseline = 'middle';
+    for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++) {
+      const x = x0 + (j - 1) * cell, y = y0 + (i - 1) * cell;
+      actx.fillStyle = '#1b1c24';
+      actx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+      if (i + j <= fillUntil) {
+        const v = AL.M[i][j] / AL.best;
+        if (v > 0) {
+          actx.fillStyle = `rgba(255,214,10,${(0.08 + v * 0.42).toFixed(3)})`;
+          actx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+        }
+      }
+    }
+    // caminho
+    const shown = AL.path.slice(0, Math.ceil(pathUntil));
+    if (shown.length) {
+      actx.strokeStyle = '#ffd60a';
+      actx.lineWidth = Math.max(2, cell * 0.12);
+      actx.lineJoin = 'round';
+      actx.lineCap = 'round';
+      actx.beginPath();
+      shown.forEach((s, k) => {
+        const cx = x0 + (s.j - 0.5) * cell, cy = y0 + (s.i - 0.5) * cell;
+        if (k) actx.lineTo(cx, cy); else actx.moveTo(cx, cy);
+      });
+      actx.stroke();
+      for (const s of shown) {
+        const cx = x0 + (s.j - 0.5) * cell, cy = y0 + (s.i - 0.5) * cell;
+        actx.beginPath();
+        actx.fillStyle = s.p === 2 ? '#7dd3fc' : s.p === 3 ? '#ff8a80' : '#ffd60a';
+        actx.arc(cx, cy, Math.max(3, cell * 0.16), 0, Math.PI * 2);
+        actx.fill();
+      }
+    }
+    const labelsOn = pathUntil >= AL.path.length;
+    // roteiro (linhas)
+    actx.textAlign = 'right';
+    SCRIPT.forEach((w, i) => {
+      const y = y0 + (i + 0.5) * cell;
+      actx.fillStyle = labelsOn && omitted.has(i) ? '#7dd3fc' : '#c9c8c2';
+      actx.fillText(w, x0 - 8, y);
+      if (labelsOn && omitted.has(i)) {
+        const tw = actx.measureText(w).width;
+        actx.fillRect(x0 - 8 - tw, y, tw, 1.5);
+      }
+    });
+    // o que foi ouvido (colunas, inclinado)
+    actx.textAlign = 'left';
+    HEARD.forEach((w, j) => {
+      actx.save();
+      actx.translate(x0 + (j + 0.5) * cell, y0 - 8);
+      actx.rotate(-Math.PI / 4);
+      actx.fillStyle = labelsOn && extra.has(j) ? '#ff8a80' : '#c9c8c2';
+      actx.fillText(w, 0, 0);
+      actx.restore();
+    });
+  }
+  function updateAlign(dt) {
+    if (reduce || !alVisible) return;
+    alT += dt;
+    if (alT > 9) alT = 0;
+    drawAlign();
+  }
+
+  /* ───────── Modos de exibição ───────── */
+  const rig = $('#rig');
+  const mon = $('#mon');
+  const modeBtns = $$('.mode-list button');
+  let step = 0;
+  let modeClock = 0;
+  let modeHold = 0;
+  let modesVisible = false;
+  new IntersectionObserver(([e]) => { modesVisible = e.isIntersecting; }).observe(rig);
+  function setStep(s) {
+    step = s;
+    rig.dataset.step = s;
+    mon.dataset.step = s;
+    modeBtns.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.step) === s)));
+  }
+  modeBtns.forEach((b) => b.addEventListener('click', () => { setStep(Number(b.dataset.step)); modeHold = 12; }));
+  function updateModes(dt) {
+    if (reduce || !modesVisible) return;
+    if (modeHold > 0) { modeHold -= dt; return; }
+    modeClock += dt;
+    if (modeClock > 4.2) { modeClock = 0; setStep((step + 1) % 4); }
+  }
+
+  /* ───────── O roteiro dirigindo o OBS ───────── */
+  const SHOW = [
+    { k: 'h', text: '# Abertura' },
+    { k: 't', text: 'Boa noite! [sorria] Hoje a gente fala de teleprompters.' },
+    { k: 'a', text: '[cena: Close]', scene: 'close', label: 'Câmera 2 · Close' },
+    { k: 't', text: 'Repare como a câmera fechou no rosto.' },
+    { k: 'c', text: '[capítulo: Bastidores]', chapter: 'Bastidores' },
+    { k: 't', text: 'Nos bastidores, cada capítulo vira uma marca na gravação.' },
+    { k: 'a', text: '[cena: Lateral]', scene: 'lado', label: 'Câmera 3 · Lateral' },
+    { k: 't', text: 'E dá para trocar de ângulo sem tocar no mouse.' },
+    { k: 'a', text: '[cena: Geral]', scene: 'geral', label: 'Câmera 1 · Geral' },
+    { k: 't', text: 'Boa gravação!' },
+  ];
+  const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  const scriptEl = $('#obs-script');
+  scriptEl.innerHTML = SHOW.map((l) => {
+    let html = esc(l.text);
+    if (l.k === 'h') html = `<span class="k-h">${html}</span>`;
+    else if (l.k === 'a' || l.k === 'c') html = `<span class="k-a">${html}</span>`;
+    else html = html.replace(/\[[^\]]*\]/g, (m) => `<span class="k-n">${m}</span>`);
+    return `<li>${html}</li>`;
+  }).join('');
+  const lines = $$('li', scriptEl);
+  const durs = SHOW.map((l) => (l.k === 't' ? Math.max(1.4, l.text.split(' ').length * 0.34) : l.k === 'h' ? 0.6 : 0.9));
+  const total = durs.reduce((a, b) => a + b, 0) + 1.5;
+  const program = $('#program');
+  const flash = $('#flash');
+  const lower = $('#lower');
+  const sceneName = $('#obs-scene');
+  const events = $('#events');
+  const rtrack = $('#rtrack');
+  const rfill = $('#rfill');
+  const recTime = $('#rec-time');
+  let obsT = reduce ? total * 0.7 : 0;
+  let obsLine = -1;
+  let studioVisible = false;
+  new IntersectionObserver(([e]) => { studioVisible = e.isIntersecting; }).observe(program);
+  function cut(scene, label) {
+    program.dataset.scene = scene;
+    lower.textContent = label;
+    sceneName.textContent = label.split(' · ')[1];
+    flash.classList.remove('go');
+    void flash.offsetWidth;
+    flash.classList.add('go');
+  }
+  function logEvent(html) {
+    const li = document.createElement('li');
+    li.innerHTML = html;
+    events.prepend(li);
+    while (events.children.length > 3) events.lastChild.remove();
+  }
+  function resetObs() {
+    obsLine = -1;
+    lines.forEach((l) => l.classList.remove('on', 'done'));
+    $$('.flag', rtrack).forEach((f) => f.remove());
+    events.replaceChildren();
+    program.dataset.scene = 'geral';
+    lower.textContent = 'Câmera 1 · Geral';
+    sceneName.textContent = 'Geral';
+    logEvent(`<b>Gravação iniciada</b> junto com a leitura`);
+  }
+  function updateObs(dt, force) {
+    if (!force && (reduce || !studioVisible)) return;
+    obsT += dt;
+    if (obsT > total) { obsT = 0; resetObs(); }
+    let acc = 0, idx = SHOW.length - 1;
+    for (let k = 0; k < SHOW.length; k++) { if (obsT < acc + durs[k]) { idx = k; break; } acc += durs[k]; }
+    if (obsT >= total - 1.5) idx = SHOW.length;
+    while (obsLine < idx) {
+      obsLine++;
+      const l = SHOW[obsLine];
+      lines.forEach((el, k) => { el.classList.toggle('on', k === obsLine); el.classList.toggle('done', k < obsLine); });
+      if (!l) break;
+      if (l.scene) { cut(l.scene, l.label); logEvent(`Cena: <b>${esc(l.label.split(' · ')[1])}</b>`); }
+      if (l.chapter) {
+        const f = document.createElement('div');
+        f.className = 'flag';
+        f.style.left = `${(obsT / total) * 100}%`;
+        f.innerHTML = `<span>${esc(l.chapter)}</span>`;
+        rtrack.appendChild(f);
+        logEvent(`Capítulo: <b>${esc(l.chapter)}</b>`);
+      }
+    }
+    rfill.style.width = `${Math.min(100, (obsT / total) * 100)}%`;
+    recTime.textContent = stamp(obsT).slice(0, 8);
+  }
+  resetObs();
+  if (reduce) updateObs(0, true);
+
+  /* ───────── Abertura: o título é lido como no teleprompter ───────── */
+  const h1 = $('#headline');
+  h1.innerHTML = h1.textContent.split(' ').map((w) => `<span class="hw">${esc(w)}</span>`).join(' ');
+  const hw = $$('.hw', h1);
+  if (!reduce) {
+    h1.classList.add('reading');
+    hw.forEach((el, i) => setTimeout(() => {
+      hw.forEach((x) => x.classList.remove('cur'));
+      el.classList.add('lit', 'cur');
+      if (i === hw.length - 1) setTimeout(() => h1.classList.remove('reading'), 400);
+    }, 350 + i * 290));
+  } else {
+    hw[hw.length - 1].classList.add('cur');
+  }
+
+  /* ───────── Tempos dos blocos: onde você estaria lendo esta página em voz alta ───────── */
+  function timecodes() {
+    const segs = $$('[data-tc]');
+    const main = $('main');
+    const all = [...main.querySelectorAll('section')];
+    let words = 0;
+    all.forEach((sec) => {
+      const tc = sec.querySelector('[data-tc]');
+      if (tc) tc.textContent = fmt(words / 2.9).padStart(5, '0');
+      const clone = sec.cloneNode(true);
+      clone.querySelectorAll('.pt, .script, .srt, canvas, .phone, .events').forEach((x) => x.remove());
+      words += (clone.textContent.match(/[\p{L}\p{N}]+/gu) || []).length;
+    });
+    return segs.length;
+  }
+  timecodes();
+
+  /* ───────── QR code da versão web ───────── */
+  if (window.QRious) {
+    new QRious({ element: $('#qr'), value: new URL('../', location.href).href, size: 224, padding: 14, background: '#edece6', foreground: '#0b0c10', level: 'M' });
+  } else {
+    $('#qr').hidden = true;
+  }
+
+  /* ───────── Um único relógio para tudo ───────── */
+  loadScript(DEMO);
+  setPlaying(!reduce);
+  if (reduce) { voice.t = voice.total * 0.45; reader.est = voice.position(); }
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.1, (now - last) / 1000);
+    last = now;
+    voice.update(dt);
+    reader.update(dt);
+    for (const v of views) v.update(reader.est, dt);
+    drawWave(dt);
+    updateBar(dt);
+    updateSrt(dt);
+    updateAlign(dt);
+    updateModes(dt);
+    updateObs(dt);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

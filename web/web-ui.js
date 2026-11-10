@@ -116,6 +116,8 @@
       window.open('https://github.com/crie-studio/inpromptu/releases/latest', '_blank', 'noopener');
     });
     credits.before(p);
+    const tour = note('<a href="sobre/" target="_blank" rel="noopener">Conheça o InPromptu</a>: a página com tudo o que ele faz, em demonstrações ao vivo.');
+    credits.before(tour);
   }
 
   // Funciona sem internet depois da primeira visita, e pode ser instalado como app.

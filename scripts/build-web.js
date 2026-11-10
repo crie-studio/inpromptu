@@ -57,6 +57,9 @@ async function main() {
   for (const f of ['bridge.js', 'web-ui.js', 'web.css']) copy(from('web', f), to('web', f));
   copy(from('LICENSE'), to('LICENSE.txt'));
   copy(from('THIRD_PARTY_NOTICES.md'), to('THIRD_PARTY_NOTICES.md'));
+  // Página de apresentação (…/sobre/), com a imagem real do editor.
+  copy(from('web', 'sobre', 'index.html'), to('sobre', 'index.html'));
+  copy(from('docs', 'images', 'editor.png'), to('sobre', 'editor.png'));
 
   // 2. Páginas: a ponte web antes dos scripts do app e regras de segurança para o navegador.
   page('editor.html', 'index.html', [
@@ -142,7 +145,7 @@ async function main() {
       const full = path.join(dir, e.name);
       const rel = path.relative(OUT, full).split(path.sep).join('/');
       if (e.isDirectory()) {
-        if (rel !== 'models') walk(full);
+        if (rel !== 'models' && rel !== 'sobre') walk(full); // modelos e a página de apresentação não vão no cache do app
       } else if (!rel.endsWith('.map') && rel !== 'sw.js') {
         shell.push(rel);
       }
