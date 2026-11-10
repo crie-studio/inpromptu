@@ -1,4 +1,4 @@
-// Gera THIRD_PARTY_NOTICES.md: licenças de tudo o que vai dentro do instalador.
+// Gera THIRD_PARTY_NOTICES.md: licenças de tudo o que vai dentro do instalador e da versão web.
 // Uso: node scripts/notices.js (rode de novo sempre que mudar uma dependência).
 const fs = require('fs');
 const path = require('path');
@@ -21,18 +21,39 @@ function npmProductionPackages() {
     out = err.stdout || ''; // npm ls sai com erro por avisos (ex.: pacotes extras), mas a lista vem certa
   }
   const dirs = [...new Set(out.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && path.resolve(l) !== path.resolve(ROOT)))];
-  return dirs.map((dir) => {
-    const pkg = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
-    const file = fs.readdirSync(dir).find((f) => LICENSE_FILES.test(f));
-    const repo = typeof pkg.repository === 'string' ? pkg.repository : pkg.repository?.url;
-    return {
-      name: pkg.name,
-      version: pkg.version,
-      license: typeof pkg.license === 'string' ? pkg.license : pkg.license?.type || 'UNKNOWN',
-      url: normalizeUrl(pkg.homepage || repo || `https://www.npmjs.com/package/${pkg.name}`),
-      text: file ? fs.readFileSync(path.join(dir, file), 'utf8').trim() : null,
-    };
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  return dirs.map(readPackage).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function readPackage(dir) {
+  const pkg = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
+  const file = fs.readdirSync(dir).find((f) => LICENSE_FILES.test(f));
+  const repo = typeof pkg.repository === 'string' ? pkg.repository : pkg.repository?.url;
+  return {
+    name: pkg.name,
+    version: pkg.version,
+    license: typeof pkg.license === 'string' ? pkg.license : pkg.license?.type || 'UNKNOWN',
+    url: normalizeUrl(pkg.homepage || repo || `https://www.npmjs.com/package/${pkg.name}`),
+    text: file ? fs.readFileSync(path.join(dir, file), 'utf8').trim() : null,
+  };
+}
+
+/** Pacotes que entram só na versão web (o PeerJS e o que ele usa), lidos do próprio empacotamento. */
+async function webOnlyPackages(known) {
+  const esbuild = require('esbuild');
+  const r = await esbuild.build({
+    entryPoints: [path.join(ROOT, 'web', 'hub.js')], bundle: true, write: false, metafile: true,
+    platform: 'browser', format: 'iife', define: { __VERSION__: '""', __MODELS__: '[]' }, logLevel: 'silent',
+  });
+  const dirs = new Set([path.join(ROOT, 'node_modules', 'peerjs')]); // a página do celular usa o peerjs.min.js
+  for (const input of Object.keys(r.metafile.inputs)) {
+    const p = input.split('\\').join('/');
+    const i = p.lastIndexOf('node_modules/');
+    if (i < 0) continue;
+    const rest = p.slice(i + 'node_modules/'.length).split('/');
+    const name = rest[0].startsWith('@') ? `${rest[0]}/${rest[1]}` : rest[0];
+    dirs.add(path.join(ROOT, p.slice(0, i), 'node_modules', name));
+  }
+  return [...dirs].map(readPackage).filter((p) => !known.has(p.name)).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 const MIT = (holder) => `MIT License
@@ -90,7 +111,9 @@ function apacheText() {
   return 'See https://www.apache.org/licenses/LICENSE-2.0';
 }
 
+async function main() {
 const pkgs = npmProductionPackages();
+const webPkgs = await webOnlyPackages(new Set(pkgs.map((p) => p.name)));
 const lines = [];
 lines.push('# Third-party notices / Avisos de terceiros', '');
 lines.push('InPromptu is MIT-licensed (see `LICENSE`). It ships with the open source components below,');
@@ -103,12 +126,17 @@ lines.push('## Summary', '');
 lines.push('| Component | Version | License |', '| --- | --- | --- |');
 for (const p of [...VENDORED, ...pkgs]) lines.push(`| [${p.name}](${p.url}) | ${p.version} | ${p.license} |`);
 lines.push('');
+lines.push('### Web version only / Só na versão web', '');
+lines.push('| Component | Version | License |', '| --- | --- | --- |');
+for (const p of webPkgs) lines.push(`| [${p.name}](${p.url}) | ${p.version} | ${p.license} |`);
+lines.push('');
 lines.push('## Downloaded on first use / Baixado no primeiro uso', '');
 lines.push('- **Vosk speech models** (e.g. `vosk-model-small-pt-0.3`), Apache License 2.0, downloaded from');
 lines.push('  https://alphacephei.com/vosk/models when the user turns on voice tracking. Not bundled in the installer.');
+lines.push('  The web version hosts copies of these models on its own site and saves them in the browser on first use.');
 lines.push('- `vosk-browser` bundles Vosk, Kaldi and OpenFst (Apache License 2.0) compiled to WebAssembly.', '');
 lines.push('## License texts', '');
-for (const p of [...VENDORED, ...pkgs]) {
+for (const p of [...VENDORED, ...pkgs, ...webPkgs]) {
   lines.push(`### ${p.name} ${p.version}`, '');
   if (p.text) lines.push('```text', p.text, '```', '');
   else if (/apache/i.test(p.license)) lines.push(`Licensed under the Apache License 2.0 (full text at the end of this file). Source: ${p.url}`, '');
@@ -117,4 +145,10 @@ for (const p of [...VENDORED, ...pkgs]) {
 lines.push('## Apache License 2.0', '', '```text', apacheText(), '```', '');
 
 fs.writeFileSync(path.join(ROOT, 'THIRD_PARTY_NOTICES.md'), lines.join('\n'));
-console.log(`THIRD_PARTY_NOTICES.md: ${pkgs.length} pacotes + ${VENDORED.length} arquivos incluídos`);
+console.log(`THIRD_PARTY_NOTICES.md: ${pkgs.length} pacotes + ${VENDORED.length} arquivos incluídos; ${webPkgs.length} só na versão web`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

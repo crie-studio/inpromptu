@@ -334,15 +334,70 @@
     applySize();
 
     /* ── Conexão ── */
+    // Versão web (celular.html?p=…): o computador é uma aba do navegador, então a conexão é direta
+    // entre os dois aparelhos (WebRTC, com o PeerJS só apresentando um ao outro), com a mesma
+    // "cara" de um WebSocket para o resto da página. No app de Windows, é o WebSocket de sempre.
+    const peerId = params.get('p') || '';
+    let peer = null;
+    let peerSocket = null;
+    function loadPeerJs() {
+      if (window.peerjs) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'vendor/peerjs.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.append(s);
+      });
+    }
+    class PeerSocket {
+      constructor(id) {
+        this.readyState = 0;
+        this.conn = null;
+        peerSocket = this;
+        loadPeerJs().then(() => {
+          if (!peer || peer.destroyed) {
+            peer = new window.peerjs.Peer({ debug: 0 });
+            // Computador fora do ar (aba fechada) ou sem conexão: tenta de novo daqui a pouco.
+            peer.on('error', () => peerSocket?.fail());
+          }
+          const go = () => {
+            if (this.readyState !== 0) return;
+            const conn = peer.connect(`inpromptu-${id}`, { reliable: true });
+            this.conn = conn;
+            conn.on('open', () => { this.readyState = 1; this.onopen?.(); });
+            conn.on('data', (d) => this.onmessage?.({ data: typeof d === 'string' ? d : JSON.stringify(d) }));
+            conn.on('close', () => this.fail());
+            conn.on('error', () => this.fail());
+          };
+          if (peer.open) go();
+          else {
+            peer.once('open', go);
+            if (peer.disconnected && !peer.destroyed) peer.reconnect();
+          }
+          setTimeout(() => { if (this.readyState === 0) this.fail(); }, 15000);
+        }, () => this.fail());
+      }
+      send(data) {
+        if (this.readyState === 1) this.conn.send(data);
+      }
+      fail() {
+        if (this.readyState === 3) return;
+        this.readyState = 3;
+        try { this.conn?.close(); } catch { /* já fechada */ }
+        this.onclose?.();
+      }
+    }
+
     function connect() {
       clearTimeout(retry);
       if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;
       const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-      ws = new WebSocket(`${proto}://${location.host}/ws?t=${encodeURIComponent(token)}`);
+      ws = peerId ? new PeerSocket(peerId) : new WebSocket(`${proto}://${location.host}/ws?t=${encodeURIComponent(token)}`);
       ws.onopen = () => setConnected(true);
       ws.onclose = () => {
         setConnected(false);
-        retry = setTimeout(connect, 1500);
+        retry = setTimeout(connect, peerId ? 3000 : 1500);
       };
       ws.onmessage = (e) => {
         let msg;

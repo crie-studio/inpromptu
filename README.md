@@ -9,12 +9,13 @@
 
 <p align="center">
   <a href="../../releases/latest"><b>Baixar para Windows</b></a> ·
+  <a href="https://crie-studio.github.io/inpromptu/"><b>Usar no navegador</b></a> ·
   <a href="#como-usar">Como usar</a> ·
   <a href="README.en.md">English</a>
 </p>
 
 <p align="center">
-  Desenvolvido por <b>Luiz Felipe Pitzer</b> · <a href="https://lfp.app.br">lfp.app.br</a> · versão 2.0.1
+  Desenvolvido por <b>Luiz Felipe Pitzer</b> · <a href="https://lfp.app.br">lfp.app.br</a> · versão 2.1.0
   (<a href="CHANGELOG.md">histórico de versões</a>)
 </p>
 
@@ -105,6 +106,27 @@ No OBS: *Ferramentas → Configurações do servidor WebSocket → Ativar servid
 
 Também dá para abrir um texto por link: `inpromptu://read?text=Olá%20mundo`.
 
+## Versão web
+
+Abra **<https://crie-studio.github.io/inpromptu/>** no Chrome ou no Edge (também funciona no Firefox e no Safari,
+com menos recursos). Não precisa instalar nada; se quiser, o navegador oferece instalar como app. O editor, o
+teleprompter e o reconhecimento de voz são os mesmos do app de Windows, e o reconhecimento continua rodando no seu
+computador: o modelo de voz é baixado uma vez e fica guardado no navegador.
+
+| No navegador | Como fica |
+| --- | --- |
+| Rastreamento de voz, modo clássico e ativado por voz | Igual ao app |
+| Tela cheia, espelhamento, câmera, contagem, cronômetro, notas e seções | Igual ao app |
+| Janela flutuante | Fica por cima dos outros programas no Chrome e no Edge |
+| Segunda tela | Uma janela que você leva para o outro monitor e põe em tela cheia (tecla `F`) |
+| OBS | Igual ao app; o navegador pode pedir permissão para acessar a rede local |
+| Legendas `.srt` | Baixadas ao terminar |
+| Celular | Pela internet, em qualquer rede (o computador e o celular só precisam estar online) |
+| Abrir e salvar `.inpromptu`, `.txt`, `.md`, `.pptx` | Igual ao app |
+
+Só no app de Windows: a faixa no topo da tela, perto da câmera; esconder a sobreposição das gravações; atalhos
+que funcionam com outro programa na frente; e a gravação de amostras de voz.
+
 ## Instalar
 
 Baixe o `InPromptu-Setup-<versão>.exe` em [Releases](../../releases/latest) e abra (Windows 10 ou 11, 64 bits).
@@ -124,6 +146,10 @@ do projeto [Vosk](https://alphacephei.com/vosk/models)), ligar o controle pelo c
 um código secreto no link) ou conectar ao OBS. O site do autor só é aberto no navegador quando você clica no
 link. Não há telemetria nem estatísticas de uso.
 
+Na versão web, o celular se conecta direto ao navegador do computador (WebRTC, criptografado); o serviço público
+do [PeerJS](https://peerjs.com) só apresenta um aparelho ao outro e não recebe o roteiro. As configurações e o
+roteiro aberto ficam guardados só no seu navegador.
+
 ## Code signing policy
 
 Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by
@@ -137,6 +163,8 @@ npm install            # também copia o detector de voz para renderer/vendor
 npm start              # abre o app
 npm test               # testes do texto e do rastreador, das legendas e da conexão com o OBS
 npm run dist           # gera o instalador em dist/
+npm run web:build      # monta a versão web em site/ (INPROMPTU_WEB_MODELS=pt para só um modelo de voz)
+npm run web:serve      # serve site/ em http://localhost:8090/
 ```
 
 Outras ferramentas:
@@ -162,7 +190,10 @@ Estrutura:
 - `renderer/engine.*` — janela oculta com microfone, detector de voz e reconhecimento, em WebAssembly
 - `renderer/remote.html` — a página do celular
 - `renderer/shared/text.js` — divisão em palavras, marcações e alinhamento da leitura
-- `.github/workflows/` — testes a cada mudança e o build das versões (veja [docs/ASSINATURA.md](docs/ASSINATURA.md))
+- `web/` — versão web: `bridge.js` faz o papel do preload do Electron e `hub.js` o do `main.js`, para as mesmas telas
+  rodarem no navegador; `scripts/build-web.js` monta o site
+- `.github/workflows/` — testes a cada mudança, o build das versões (veja [docs/ASSINATURA.md](docs/ASSINATURA.md))
+  e a publicação da versão web no GitHub Pages
 
 > O NSIS (usado pelo instalador) não aceita caminhos com mais de 260 caracteres. Se a pasta do projeto for
 > muito funda, gere o instalador a partir de uma pasta curta (ex.: `C:\dev\inpromptu`).

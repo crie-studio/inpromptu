@@ -12,3 +12,7 @@ desktop.ini
 .vscode/
 .idea/
 *.log
+
+# Versão web (npm run web:build)
+site/
+.cache/

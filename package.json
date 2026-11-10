@@ -1,7 +1,7 @@
 {
   "name": "inpromptu",
   "productName": "InPromptu",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "O teleprompter que acompanha a sua voz: gratuito, offline e de código aberto, para Windows.",
   "main": "main.js",
   "author": {
@@ -33,7 +33,9 @@
     "test:asr": "electron scripts/asr-test.js",
     "dist": "electron-builder --win",
     "vendor": "node scripts/vendor.js",
-    "obs-mock": "node scripts/obs-mock.js"
+    "obs-mock": "node scripts/obs-mock.js",
+    "web:build": "node scripts/build-web.js",
+    "web:serve": "node scripts/serve-web.js"
   },
   "dependencies": {
     "@fontsource/opendyslexic": "5.3.0",
@@ -46,7 +48,9 @@
     "@ricky0123/vad-web": "0.0.31",
     "electron": "45.1.0",
     "electron-builder": "26.18.0",
-    "onnxruntime-web": "1.31.1"
+    "esbuild": "0.28.2",
+    "onnxruntime-web": "1.31.1",
+    "peerjs": "1.5.5"
   },
   "build": {
     "appId": "br.app.lfp.inpromptu",

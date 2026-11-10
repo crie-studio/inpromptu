@@ -1,4 +1,5 @@
-// Gera build/icon.png (512×512) a partir de build/icon.svg. Uso: npx electron scripts/make-icon.js
+// Gera build/icon.png e assets/icon.png (512×512) e assets/icon-192.png a partir de build/icon.svg.
+// Uso: npx electron scripts/make-icon.js
 const { app, BrowserWindow } = require('electron');
 const fs = require('fs');
 const path = require('path');
@@ -18,5 +19,7 @@ app.whenReady().then(async () => {
   fs.writeFileSync(path.join(__dirname, '..', 'build', 'icon.png'), png);
   fs.mkdirSync(path.join(__dirname, '..', 'assets'), { recursive: true });
   fs.writeFileSync(path.join(__dirname, '..', 'assets', 'icon.png'), png);
+  // Versão web (app instalável): o navegador pede também um ícone de 192×192.
+  fs.writeFileSync(path.join(__dirname, '..', 'assets', 'icon-192.png'), img.resize({ width: 192, height: 192, quality: 'best' }).toPNG());
   app.quit();
 });

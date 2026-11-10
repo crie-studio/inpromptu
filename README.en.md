@@ -9,11 +9,12 @@
 
 <p align="center">
   <a href="../../releases/latest"><b>Download for Windows</b></a> ·
+  <a href="https://crie-studio.github.io/inpromptu/"><b>Use in your browser</b></a> ·
   <a href="README.md">Português</a>
 </p>
 
 <p align="center">
-  Developed by <b>Luiz Felipe Pitzer</b> · <a href="https://lfp.app.br">lfp.app.br</a> · version 2.0.1
+  Developed by <b>Luiz Felipe Pitzer</b> · <a href="https://lfp.app.br">lfp.app.br</a> · version 2.1.0
   (<a href="CHANGELOG.md">release history</a>, in Portuguese)
 </p>
 
@@ -49,6 +50,13 @@ sentence. Everything runs on your computer: no audio ever leaves your machine.
 | `# Intro` (at the start of a line) | Section: keys `1`–`9` and the phone jump straight to it |
 | `[cena: Camera 2]` | Switches OBS to that scene when the reading gets there |
 | `[capítulo: Q&A]` | Adds a chapter to the OBS recording |
+
+## Web version
+
+Open **<https://crie-studio.github.io/inpromptu/>** in Chrome or Edge (Firefox and Safari work too, with fewer
+features). It runs the same editor, teleprompter and on-device voice tracking as the Windows app; the voice model
+is downloaded once and kept in the browser. The phone remote connects over the internet, from any network. The
+strip near the camera, hiding from screen recordings and system-wide shortcuts are Windows-only.
 
 ## Install
 

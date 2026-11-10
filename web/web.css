@@ -1,0 +1,15 @@
+/* Versão web: o que não existe no navegador fica escondido. */
+.web-hidden { display: none !important; }
+
+/* Teleprompter dentro da página (tela cheia, ou sem janela flutuante disponível). */
+.inpromptu-stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  z-index: 2147483000;
+  background: #000;
+}
+
+.web-note a { color: var(--accent); }

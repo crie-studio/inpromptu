@@ -1,7 +1,22 @@
 'use strict';
 // Extrai as anotações do apresentador de um .pptx, na ordem dos slides.
-const path = require('path');
 const JSZip = require('jszip');
+
+// Caminhos dentro do .zip (sempre com "/"), sem o módulo path do Node: o mesmo arquivo roda na versão web.
+const dirname = (p) => {
+  const i = p.lastIndexOf('/');
+  return i < 0 ? '.' : p.slice(0, i) || '/';
+};
+const basename = (p) => p.slice(p.lastIndexOf('/') + 1);
+function normalize(p) {
+  const out = [];
+  for (const seg of p.split('/')) {
+    if (seg === '..') out.pop();
+    else if (seg && seg !== '.') out.push(seg);
+  }
+  return (p.startsWith('/') ? '/' : '') + out.join('/');
+}
+const join = (...parts) => normalize(parts.join('/'));
 
 const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
 
@@ -27,7 +42,8 @@ function relsOf(xml) {
 }
 
 function resolve(fromFile, target) {
-  return path.posix.normalize(path.posix.join(path.posix.dirname(fromFile), target));
+  // Alvo absoluto ("/ppt/slides/slide1.xml") é relativo à raiz do pacote.
+  return target.startsWith('/') ? normalize(target.slice(1)) : join(dirname(fromFile), target);
 }
 
 /** Texto do placeholder "body" das anotações, um parágrafo por linha. */
@@ -61,7 +77,7 @@ async function extractNotes(buffer) {
     const rel = rels.get(rid);
     if (!rel) continue;
     const slidePath = resolve('ppt/presentation.xml', rel.target);
-    const slideRelsPath = path.posix.join(path.posix.dirname(slidePath), '_rels', path.posix.basename(slidePath) + '.rels');
+    const slideRelsPath = join(dirname(slidePath), '_rels', basename(slidePath) + '.rels');
     const slideRels = await read(slideRelsPath);
     if (!slideRels) continue;
     const notesRel = [...relsOf(slideRels).values()].find((r) => r.type.endsWith('/notesSlide'));

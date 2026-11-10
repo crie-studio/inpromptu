@@ -1,0 +1,68 @@
+# Publica a versão web no GitHub Pages a cada mudança na main (e manualmente, pela aba Actions).
+# Precisa do GitHub Pages ligado com a origem "GitHub Actions" (Settings → Pages).
+name: Versão web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'renderer/**'
+      - 'web/**'
+      - 'src/**'
+      - 'assets/**'
+      - 'scripts/build-web.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+      - name: Testes
+        run: npm test
+
+      # Os modelos de voz são baixados do site do Vosk e convertidos uma vez; ficam no cache entre builds.
+      - uses: actions/cache@v6
+        with:
+          path: .cache/web-models
+          key: web-models-v1
+
+      - name: Montar o site
+        run: npm run web:build
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
