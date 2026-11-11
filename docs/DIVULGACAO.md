@@ -38,7 +38,7 @@ A tag de verificação já está na página inicial.
   recognition guided by your script. It stops when you stop, finds you again if you skip a sentence, and runs
   entirely on your computer. It integrates with OBS Studio (records with the reading, switches scenes, adds
   chapters), writes .srt subtitles, mirrors the text for beam-splitter teleprompters, supports a second screen
-  and can be controlled from a phone. Interface in Portuguese.
+  and can be controlled from a phone. Interface in English and Portuguese.
 - **Platforms:** Windows, Online/Web, Self-Hosted
 - **License:** Free, Open Source (MIT)
 - **Tags:** teleprompter, speech-recognition, voice-control, obs-studio, video-recording, autocue
@@ -58,7 +58,7 @@ A tag de verificação já está na página inicial.
   > Hi! I built InPromptu because voice-following teleprompters were either paid, online-only or missing on
   > Windows. It runs Vosk (WebAssembly) guided by the words in your script, a Silero voice detector, and an
   > alignment step that tolerates skipped and swapped words, so it keeps up even when you improvise a bit.
-  > It's MIT-licensed and the voice never leaves your machine. The UI is in Portuguese for now; feedback welcome!
+  > It's MIT-licensed and the voice never leaves your machine. The UI is in English and Portuguese; feedback welcome!
 
 ## 5. Hacker News (Show HN)
 

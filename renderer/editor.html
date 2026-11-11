@@ -17,7 +17,7 @@
       <button id="f-new" class="ghost" title="Novo (Ctrl+N)">Novo</button>
       <button id="f-open" class="ghost" title="Abrir .inpromptu, .txt, .md ou .pptx (Ctrl+O)">Abrir</button>
       <button id="f-save" class="ghost" title="Salvar (Ctrl+S)">Salvar</button>
-      <span id="file-name" class="file-name">Sem título</span>
+      <span id="file-name" class="file-name" data-i18n="skip"></span>
     </div>
     <div class="spacer"></div>
     <div class="seg compact" data-key="mode" title="Modo de guia">
@@ -48,7 +48,7 @@
           <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </button>
       </div>
-      <ol id="page-list"></ol>
+      <ol id="page-list" data-i18n="skip"></ol>
       <p class="pages-hint">Arraste um <b>.pptx</b> para importar as anotações do apresentador como páginas.</p>
     </aside>
 
@@ -226,7 +226,7 @@ Dicas:
         <section data-pane="aparencia" class="pane">
           <div class="preview-wrap">
             <div id="preview" class="preview">
-              <div class="pv-text"></div>
+              <div class="pv-text" data-i18n="skip"></div>
               <div class="pv-bar"><i></i><i></i><i></i><i></i><i></i><span></span></div>
             </div>
           </div>
@@ -276,7 +276,7 @@ Dicas:
               <div class="fsp-inner">
                 <div class="fsp-cam"></div>
                 <div class="fsp-bg"></div>
-                <div class="fsp-view"><div class="fsp-text"></div></div>
+                <div class="fsp-view"><div class="fsp-text" data-i18n="skip"></div></div>
                 <div class="fsp-marker"><div class="col"></div></div>
                 <div class="fsp-bar"><span></span></div>
               </div>
@@ -461,7 +461,7 @@ Dicas:
             </div>
           </div>
           <p id="remote-error" class="note error" hidden></p>
-          <p class="note">O celular precisa estar na mesma rede Wi-Fi. Na primeira vez, o Windows pode pedir para liberar o app no firewall (marque <b>Redes privadas</b>). O tráfego não é criptografado — use só em redes confiáveis.</p>
+          <p class="note" id="remote-lan-note">O celular precisa estar na mesma rede Wi-Fi. Na primeira vez, o Windows pode pedir para liberar o app no firewall (marque <b>Redes privadas</b>). O tráfego não é criptografado — use só em redes confiáveis.</p>
 
           <h3>OBS Studio</h3>
           <p class="note">Grava no OBS junto com a leitura, troca de cena quando a leitura passa por <code>[cena: Nome da cena]</code> no roteiro e marca capítulos. No OBS: <b>Ferramentas → Configurações do servidor WebSocket</b> → marque <b>Ativar servidor WebSocket</b>; a senha aparece em <b>Mostrar informações de conexão</b>.</p>
@@ -505,6 +505,15 @@ Dicas:
 
         <!-- Atalhos -->
         <section data-pane="atalhos" class="pane">
+          <h3>Idioma</h3>
+          <div class="field">
+            <label for="ui-language">Idioma da interface</label>
+            <select id="ui-language" data-key="uiLanguage">
+              <option value="auto">Automático (o do sistema)</option>
+              <option value="pt">Português</option>
+              <option value="en">English</option>
+            </select>
+          </div>
           <h3>Atalhos globais</h3>
           <p class="note">Funcionam mesmo com outro app em primeiro plano.</p>
           <table id="shortcut-table" class="shortcuts"></table>
@@ -544,7 +553,7 @@ Dicas:
           <p class="note">O reconhecimento de voz roda no seu computador com o <a href="#" data-href="https://alphacephei.com/vosk/">Vosk</a> (Apache 2.0). Nenhum áudio sai da sua máquina. O modelo de cada idioma é baixado uma única vez.</p>
           <p class="note">Formatos: <b>.inpromptu</b> (páginas; também abre os antigos <b>.roteiro</b>), <b>.txt</b>/<b>.md</b> (separe páginas com uma linha <code>---</code>) e <b>.pptx</b> (anotações do apresentador).</p>
           <p class="note">No texto: <code>[nota]</code> entre colchetes aparece em outra cor e não é lida; <code>[cena: Nome]</code> troca de cena no OBS e <code>[capítulo: Nome]</code> marca um capítulo quando a leitura passa por ali; uma linha começando com <code>#</code> vira uma seção, para pular direto com as teclas 1 a 9 ou pelo celular.</p>
-          <p class="note">Créditos: Vosk e vosk-browser (Apache 2.0), Silero VAD e ONNX Runtime (MIT), fonte OpenDyslexic (SIL OFL). A ideia da faixa no topo da tela, perto da câmera, veio do <a href="#" data-href="https://github.com/f/textream">Textream</a>, de Fatih Kadir Akın.</p>
+          <p class="note" id="about-credits">Créditos: Vosk e vosk-browser (Apache 2.0), Silero VAD e ONNX Runtime (MIT), fonte OpenDyslexic (SIL OFL). A ideia da faixa no topo da tela, perto da câmera, veio do <a href="#" data-href="https://github.com/f/textream">Textream</a>, de Fatih Kadir Akın.</p>
         </section>
       </div>
     </aside>
@@ -553,6 +562,8 @@ Dicas:
   <div id="drop" hidden><div>Solte para abrir</div></div>
   <div id="toast" hidden></div>
 
+  <script src="shared/i18n-en.js"></script>
+  <script src="shared/i18n.js"></script>
   <script src="shared/text.js"></script>
   <script src="editor.js"></script>
 </body>

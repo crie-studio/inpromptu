@@ -29,8 +29,9 @@ Paste your script, click **Start** and read while looking at the camera. InPromp
 each word as you say it; the text moves at your pace, stops when you stop and finds you again if you skip a
 sentence. Everything runs on your computer: no audio ever leaves your machine.
 
-> The interface is in Brazilian Portuguese. Voice tracking currently ships with a Portuguese model; the classic
-> and voice-activated modes work with any language.
+> The interface is in English and Brazilian Portuguese and follows your system language (change it under
+> **More → Language**). Voice tracking understands English, Portuguese and Spanish (the Windows app adds French,
+> German and Italian); the classic and voice-activated modes work with any language.
 
 ## Highlights
 
@@ -49,8 +50,8 @@ sentence. Everything runs on your computer: no audio ever leaves your machine.
 | --- | --- |
 | `[smile]`, `[pause]` | Stage direction, shown in blue and not expected to be read |
 | `# Intro` (at the start of a line) | Section: keys `1`–`9` and the phone jump straight to it |
-| `[cena: Camera 2]` | Switches OBS to that scene when the reading gets there |
-| `[capítulo: Q&A]` | Adds a chapter to the OBS recording |
+| `[scene: Camera 2]` | Switches OBS to that scene when the reading gets there (`[cena: …]` also works) |
+| `[chapter: Q&A]` | Adds a chapter to the OBS recording (`[capítulo: …]` also works) |
 
 ## Web version
 

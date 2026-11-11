@@ -8,9 +8,11 @@
   const toggleOf = (key) => $(`[data-key="${key}"]`)?.closest('label.toggle') || null;
   const fieldOf = (sel) => $(sel)?.closest('.field') || null;
   const hub = window.__inpromptuHub;
+  // A tela pode já estar em inglês: os títulos são procurados pelo texto traduzido.
+  const T = (text) => (window.InPromptuI18n ? window.InPromptuI18n.t(text) : text);
 
   function heading(pane, title) {
-    return $$(`[data-pane="${pane}"] h3`).find((h) => h.textContent.trim() === title) || null;
+    return $$(`[data-pane="${pane}"] h3`).find((h) => h.textContent.trim() === T(title)) || null;
   }
   function hideSection(pane, title) {
     const h = heading(pane, title);
@@ -78,7 +80,7 @@
   const cel = heading('remoto', 'Celular (rede local)');
   if (cel) cel.textContent = 'Celular';
   hide(fieldOf('#remote-port'));
-  const lanNote = $$('[data-pane="remoto"] p.note').find((p) => p.textContent.includes('mesma rede Wi-Fi'));
+  const lanNote = $('#remote-lan-note');
   if (lanNote) {
     lanNote.innerHTML = 'Funciona em qualquer rede: o celular e o computador só precisam de internet. A conexão é direta entre os dois aparelhos (WebRTC, criptografada); o serviço público do <a href="#" data-href="https://peerjs.com">PeerJS</a> só apresenta um ao outro. Deixe esta aba aberta durante a leitura.';
     $('a', lanNote).addEventListener('click', (e) => {
@@ -108,7 +110,7 @@
   }
 
   // Sobre: o que fica só no app de Windows.
-  const credits = $$('[data-pane="atalhos"] p.note').find((p) => p.textContent.startsWith('Créditos'));
+  const credits = $('#about-credits');
   if (credits) {
     const p = note('Esta é a versão web. O <a href="#" data-href="https://github.com/crie-studio/inpromptu/releases/latest">app para Windows</a> tem ainda a faixa no topo da tela, perto da câmera, o modo escondido das gravações e atalhos que funcionam com outros programas na frente.');
     $('a', p).addEventListener('click', (e) => {

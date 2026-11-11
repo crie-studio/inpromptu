@@ -9,11 +9,12 @@ class SettingsStore {
   constructor(dir) {
     this.file = path.join(dir, 'settings.json');
     this.values = { ...DEFAULTS };
+    this.firstRun = false;
     try {
       // Só as opções que ainda existem (versões antigas tinham outras).
       const saved = JSON.parse(fs.readFileSync(this.file, 'utf8'));
       for (const key of Object.keys(DEFAULTS)) if (key in saved) this.values[key] = saved[key];
-    } catch { /* primeira execução */ }
+    } catch { this.firstRun = true; }
     if (!this.values.remoteToken) this.values.remoteToken = SettingsStore.newToken();
     this.saveTimer = null;
   }

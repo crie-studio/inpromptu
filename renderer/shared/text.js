@@ -31,7 +31,7 @@
   /**
    * Divide o texto em palavras, guardando quantas quebras de linha vêm depois de cada uma.
    * O que não é para ler em voz alta fica com `norm` vazio (o rastreador pula):
-   * - notas de direção entre [colchetes] → `note`; [cena: Nome] e [capítulo: Nome] também
+   * - notas de direção entre [colchetes] → `note`; [cena: Nome] e [capítulo: Nome] (ou [scene:] e [chapter:]) também
    *   viram `action` (para o OBS), na primeira palavra da nota;
    * - linhas que começam com # → `heading` (seções, para pular direto até elas).
    */
@@ -74,8 +74,8 @@
 
   function noteAction(words) {
     const inner = words.map((w) => w.text).join(' ').replace(/^\[|\][^\]]*$/g, '').trim();
-    const m = /^(cena|cap[ií]tulo)\s*:\s*(.+)$/i.exec(inner);
-    if (m) words[0].action = { type: /^cena$/i.test(m[1]) ? 'scene' : 'chapter', name: m[2].trim() };
+    const m = /^(cena|scene|cap[ií]tulo|chapter)\s*:\s*(.+)$/i.exec(inner);
+    if (m) words[0].action = { type: /^(cena|scene)$/i.test(m[1]) ? 'scene' : 'chapter', name: m[2].trim() };
   }
 
   /** Seções da página (linhas com #): [{ index, title }], na ordem. */

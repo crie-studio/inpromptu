@@ -2,6 +2,7 @@
 // (voz, velocidade constante ou ativado por voz) e rola o texto até lá.
 (() => {
   'use strict';
+  const t = (text, vars) => (window.InPromptuI18n ? window.InPromptuI18n.t(text, vars) : text);
   const api = window.inpromptu;
   const { tokenize, sections, grammarWords, Tracker } = window.InPromptuText;
   const $ = (sel) => document.querySelector(sel);
@@ -150,8 +151,8 @@
       const devices = await navigator.mediaDevices.enumerateDevices().catch(() => []);
       const label = devices.find((d) => d.deviceId === id)?.label || '';
       setCamMessage(/obs/i.test(label)
-        ? 'No OBS, clique em “Iniciar câmera virtual”'
-        : 'Câmera indisponível (em uso por outro app?)');
+        ? t('No OBS, clique em “Iniciar câmera virtual”')
+        : t('Câmera indisponível (em uso por outro app?)'));
       // A câmera virtual do OBS só funciona com o OBS aberto: tenta de novo até ela aparecer.
       camRetry = setTimeout(() => openCamera(id), 3000);
     }

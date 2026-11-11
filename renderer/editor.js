@@ -21,7 +21,8 @@
   let settings = {};
   let models = [];
   let doc = { pages: [''], pageIndex: 0, filePath: null };
-  let fileName = 'Sem título';
+  const t = (text, vars) => (window.InPromptuI18n ? window.InPromptuI18n.t(text, vars) : text);
+  let fileName = t('Sem título');
   let dirty = false;
   let running = false;
   let readingPage = -1;
@@ -136,7 +137,7 @@
   }
 
   function deletePage(i) {
-    if (doc.pages[i].trim() && !confirm(`Excluir a página ${i + 1}?`)) return;
+    if (doc.pages[i].trim() && !confirm(t('Excluir a página {n}?', { n: i + 1 }))) return;
     if (doc.pages.length === 1) doc.pages[0] = '';
     else doc.pages.splice(i, 1);
     if (doc.pageIndex >= doc.pages.length || doc.pageIndex > i) doc.pageIndex = Math.max(0, doc.pageIndex - 1);
@@ -156,7 +157,7 @@
   /* ───────────────────────── Arquivos ───────────────────────── */
 
   function confirmDiscard() {
-    return !dirty || confirm('Há alterações não salvas. Continuar mesmo assim?');
+    return !dirty || confirm(t('Há alterações não salvas. Continuar mesmo assim?'));
   }
 
   function loadFile(result) {
@@ -194,7 +195,7 @@
   function newFile() {
     if (!confirmDiscard()) return;
     dirty = false;
-    setDoc({ pages: [''], pageIndex: 0, filePath: null }, 'Sem título');
+    setDoc({ pages: [''], pageIndex: 0, filePath: null }, t('Sem título'));
     script.focus();
   }
 
@@ -521,7 +522,7 @@
     const pv = $('#preview');
     const text = $('.pv-text', pv);
     if (!text.childElementCount) {
-      const words = 'Seu texto aparece assim, logo abaixo da câmera. As palavras lidas ficam coloridas e o texto rola sozinho enquanto você fala.'.split(' ');
+      const words = t('Seu texto aparece assim, logo abaixo da câmera. As palavras lidas ficam coloridas e o texto rola sozinho enquanto você fala.').split(' ');
       words.forEach((w, i) => {
         const s = document.createElement('span');
         s.textContent = w;
@@ -586,7 +587,7 @@
     const text = $('.fsp-text', pv);
     text.style.fontFamily = FONTS[s.fontFamily] || FONTS.sans;
     if (!text.childElementCount) {
-      const sample = 'Bom dia! Hoje vou mostrar como o texto aparece na tela cheia. Ajuste o tamanho, o alinhamento e a largura da coluna até a leitura ficar confortável. A linha de leitura mostra onde seus olhos devem ficar enquanto o texto sobe sozinho.';
+      const sample = t('Bom dia! Hoje vou mostrar como o texto aparece na tela cheia. Ajuste o tamanho, o alinhamento e a largura da coluna até a leitura ficar confortável. A linha de leitura mostra onde seus olhos devem ficar enquanto o texto sobe sozinho.');
       sample.split(' ').forEach((word, i) => {
         const span = document.createElement('span');
         span.textContent = word;
@@ -708,7 +709,7 @@
     $('#shortcut-table').replaceChildren(...list.map((s) => {
       const tr = document.createElement('tr');
       const keys = document.createElement('td');
-      keys.innerHTML = s.accel.split(' + ').map((k) => `<kbd>${k.replace('Space', 'Espaço')}</kbd>`).join(' + ');
+      keys.innerHTML = s.accel.split(' + ').map((k) => `<kbd>${k.replace('Space', t('Espaço'))}</kbd>`).join(' + ');
       const label = document.createElement('td');
       label.textContent = s.label;
       if (s.busy) {
@@ -748,6 +749,11 @@
 
   async function init() {
     settings = await api.invoke('settings:get');
+    // O idioma escolhido fica guardado para as outras telas; se mudou, a tela recarrega já nele.
+    if (window.InPromptuI18n?.sync(settings.uiLanguage)) {
+      location.reload();
+      return;
+    }
     const saved = await api.invoke('doc:get');
     if (saved.filePath) fileName = saved.filePath.split(/[\\/]/).pop().replace(/\.(inpromptu|roteiro)$/i, '');
     setDoc(saved);
@@ -760,6 +766,10 @@
     if (settings.obsPasswordEnc) $('#obs-pass-note').textContent = 'Há uma senha salva.';
     setRunning(await api.invoke('session:running'));
     api.on('settings:changed', (s) => {
+      if (s.uiLanguage !== settings.uiLanguage && window.InPromptuI18n?.sync(s.uiLanguage)) {
+        location.reload();
+        return;
+      }
       settings = s;
       renderSettings();
     });

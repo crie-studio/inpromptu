@@ -5,6 +5,7 @@
 const http = require('http');
 const os = require('os');
 const fs = require('fs');
+const path = require('path');
 const { WebSocketServer } = require('ws');
 const QRCode = require('qrcode');
 
@@ -104,6 +105,15 @@ class RemoteServer {
       fs.readFile(this.iconPath, (err, png) => {
         if (err) res.writeHead(404).end();
         else res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'max-age=86400' }).end(png);
+      });
+      return;
+    }
+    // Textos do celular em inglês (públicos, como o ícone).
+    const i18n = /^\/shared\/(i18n|i18n-en)\.js$/.exec(url.pathname);
+    if (req.method === 'GET' && i18n) {
+      fs.readFile(path.join(path.dirname(this.htmlPath), 'shared', `${i18n[1]}.js`), (err, js) => {
+        if (err) res.writeHead(404).end();
+        else res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff' }).end(js);
       });
       return;
     }

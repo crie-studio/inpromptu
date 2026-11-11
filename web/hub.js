@@ -17,6 +17,9 @@ const AUTHOR = 'Luiz Felipe Pitzer';
 const WEBSITE = 'https://lfp.app.br';
 const HAS_PIP = 'documentPictureInPicture' in window;
 const MODEL_CACHE = 'inpromptu-modelos';
+// Textos da interface: em inglês quando a tela está em inglês (renderer/shared/i18n.js).
+const t = (text, vars) => (window.InPromptuI18n ? window.InPromptuI18n.t(text, vars) : text);
+const UI_EN = window.InPromptuI18n?.lang === 'en';
 
 const hubId = Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => b.toString(16).padStart(2, '0')).join('');
 const channel = new BroadcastChannel(`inpromptu-${hubId}`);
@@ -67,7 +70,12 @@ function loadSettings() {
     const saved = JSON.parse(store.get('inpromptu.settings') || '{}');
     for (const key of Object.keys(DEFAULTS)) if (key in saved) v[key] = saved[key];
   } catch { /* primeira vez */ }
-  if (!store.get('inpromptu.settings')) v.overlay = HAS_PIP ? 'floating' : 'fullscreen'; // primeira vez
+  if (!store.get('inpromptu.settings')) {
+    // Primeira vez: janela flutuante (ou tela cheia) e a fala no idioma do navegador, se houver modelo para ele.
+    v.overlay = HAS_PIP ? 'floating' : 'fullscreen';
+    const locale = String(navigator.language || '').slice(0, 2).toLowerCase();
+    if (MODELS.some((m) => m.id === locale)) v.language = locale;
+  }
   v.overlay = webOverlay(v.overlay);
   if (!v.remoteToken) v.remoteToken = newToken();
   v.obsPasswordEnc = store.get('inpromptu.obsPassword') ? 'web' : '';
@@ -89,7 +97,10 @@ function setSettings(patch) {
   }
   settings.overlay = webOverlay(settings.overlay);
   clearTimeout(settingsTimer);
-  settingsTimer = setTimeout(() => store.set('inpromptu.settings', JSON.stringify(settings)), 300);
+  settingsTimer = setTimeout(() => {
+    settingsTimer = null;
+    store.set('inpromptu.settings', JSON.stringify(settings));
+  }, 300);
   return { ...settings };
 }
 
@@ -127,6 +138,17 @@ O que estiver entre colchetes é uma nota para você e não precisa ser lido. [p
 
 Quando terminar, aperte Esc ou o botão de parar.`;
 
+const EXAMPLE_EN = `# Welcome to InPromptu
+Hi! This is InPromptu, the teleprompter that follows your voice, now right in your browser. [smile]
+
+Paste your text here, choose the reading mode and click Start. In voice tracking, each word is highlighted as you speak and the text moves up at your pace. If you skip a sentence, InPromptu finds you again.
+
+# Tips
+Anything in brackets is a note for you and doesn't need to be read. [pause] Lines that start with a hash sign become sections: keys one to nine jump straight to them.
+
+When you finish, press Esc or the stop button.`;
+const SAMPLE = UI_EN ? EXAMPLE_EN : EXEMPLO;
+
 function sanitizeDoc(d) {
   const pages = (Array.isArray(d?.pages) ? d.pages : [String(d?.text ?? '')]).map((p) => String(p ?? ''));
   if (!pages.length) pages.push('');
@@ -137,16 +159,31 @@ function sanitizeDoc(d) {
 let doc;
 try {
   const savedDoc = JSON.parse(store.get('inpromptu.doc') || 'null');
-  doc = savedDoc && Array.isArray(savedDoc.pages) && savedDoc.pages.length ? sanitizeDoc(savedDoc) : { pages: [EXEMPLO], pageIndex: 0, filePath: null };
+  doc = savedDoc && Array.isArray(savedDoc.pages) && savedDoc.pages.length ? sanitizeDoc(savedDoc) : { pages: [SAMPLE], pageIndex: 0, filePath: null };
 } catch {
-  doc = { pages: [EXEMPLO], pageIndex: 0, filePath: null };
+  doc = { pages: [SAMPLE], pageIndex: 0, filePath: null };
 }
 
 let docTimer = null;
 function saveDoc() {
   clearTimeout(docTimer);
-  docTimer = setTimeout(() => store.set('inpromptu.doc', JSON.stringify(doc)), 400);
+  docTimer = setTimeout(() => {
+    docTimer = null;
+    store.set('inpromptu.doc', JSON.stringify(doc));
+  }, 400);
 }
+
+// Ao sair ou recarregar (por exemplo, ao trocar o idioma), grava o que ainda estava esperando.
+window.addEventListener('pagehide', () => {
+  if (settingsTimer) {
+    clearTimeout(settingsTimer);
+    store.set('inpromptu.settings', JSON.stringify(settings));
+  }
+  if (docTimer) {
+    clearTimeout(docTimer);
+    store.set('inpromptu.doc', JSON.stringify(doc));
+  }
+});
 
 const baseName = (p) => String(p || '').split(/[\\/]/).pop().replace(/\.[^.]+$/, '');
 
@@ -174,7 +211,7 @@ function openFileDialog() {
   if (window.showOpenFilePicker) {
     return window.showOpenFilePicker({
       types: [{
-        description: 'Roteiros e textos',
+        description: t('Roteiros e textos'),
         accept: { 'application/octet-stream': ['.inpromptu', '.roteiro', '.pptx'], 'text/plain': ['.txt', '.md'] },
       }],
     }).then(async ([handle]) => {
@@ -206,13 +243,13 @@ async function saveFile({ filePath, pages, saveAs }) {
     await writeHandle(existing, data);
     return { filePath, name: existing.name };
   }
-  const suggested = `${filePath ? baseName(filePath) : 'Meu roteiro'}.inpromptu`;
+  const suggested = `${filePath ? baseName(filePath) : t('Meu roteiro')}.inpromptu`;
   if (window.showSaveFilePicker) {
     let handle;
     try {
       handle = await window.showSaveFilePicker({
         suggestedName: suggested,
-        types: [{ description: 'Roteiro do InPromptu', accept: { 'application/json': ['.inpromptu'] } }],
+        types: [{ description: t('Roteiro do InPromptu'), accept: { 'application/json': ['.inpromptu'] } }],
       });
     } catch {
       return null;
@@ -795,7 +832,7 @@ function send(from, ch, payload) {
       remote.broadcast({ type: 'doc', ...lastOverlayDoc });
       if (run && typeof d.page === 'number' && d.page !== run.lastPage) {
         if (run.lastPage !== null && settings.obsChapters && (run.obsRecording || run.obsExternal)) {
-          obsAction({ type: 'chapter', name: `Página ${d.page + 1}` });
+          obsAction({ type: 'chapter', name: t(`Página ${d.page + 1}`) });
         }
         run.lastPage = d.page;
       }

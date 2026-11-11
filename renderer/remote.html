@@ -227,9 +227,9 @@
   <section id="idle">
     <div class="card">
       <div class="eyebrow">Aberto no computador</div>
-      <h2 id="idle-name">Roteiro</h2>
+      <h2 id="idle-name" data-i18n="skip"></h2>
       <div class="meta" id="idle-meta"></div>
-      <p class="preview" id="idle-preview"></p>
+      <p class="preview" id="idle-preview" data-i18n="skip"></p>
     </div>
     <div>
       <div class="eyebrow" style="margin: 0 4px 8px">Modo de leitura</div>
@@ -252,11 +252,11 @@
       <span id="timer"><b id="t-el"></b><span id="t-rem"></span></span>
     </div>
     <div id="prompt">
-      <div id="stage"><div id="text"></div></div>
+      <div id="stage"><div id="text" data-i18n="skip"></div></div>
       <div id="countdown" hidden><b id="count-n">3</b><span>Prepare-se</span></div>
       <div class="bars"><div class="bar" id="progress"><div></div></div><div class="bar" id="level"><div></div></div></div>
     </div>
-    <div id="sections" hidden></div>
+    <div id="sections" data-i18n="skip" hidden></div>
     <div id="deck">
       <div class="nav">
         <button class="btn" id="b-prev" aria-label="Página anterior"><svg class="i"><use href="#i-prev"/></svg><span>Anterior</span></button>
@@ -302,12 +302,15 @@
   </div>
   <div id="toast" class="toast" hidden></div>
 
+  <script src="shared/i18n-en.js"></script>
+  <script src="shared/i18n.js"></script>
   <script>
   (() => {
     'use strict';
     const HL = { white: '#ffffff', yellow: '#ffd60a', green: '#30d158', blue: '#64d2ff', pink: '#ff6fae', orange: '#ff9f0a' };
     const SIZES = [20, 24, 28, 34, 42];
     const $ = (s) => document.querySelector(s);
+    const t = (text, vars) => (window.InPromptuI18n ? window.InPromptuI18n.t(text, vars) : text);
     const body = document.body;
     const params = new URLSearchParams(location.search);
     const token = params.get('t') || '';
@@ -530,7 +533,7 @@
 
       // Antes de começar
       const idle = st.idle;
-      $('#idle-name').textContent = idle?.name || 'Roteiro aberto no editor';
+      $('#idle-name').textContent = idle?.name || t('Roteiro aberto no editor');
       const parts = [];
       if (idle) {
         if (idle.pages > 1) parts.push(`${idle.pages} páginas`);

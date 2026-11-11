@@ -34,6 +34,7 @@ frase. Tudo roda no seu computador: nenhum áudio sai da sua máquina.
 
 - **Segue as palavras, não só o volume.** O reconhecimento é guiado pelo próprio roteiro, então acerta nomes e
   termos difíceis, e funciona em português com um modelo leve (~31 MB).
+  A interface está em português e em inglês (segue o idioma do sistema; troque em *Mais → Idioma*).
 - **Feito para quem grava.** Conversa com o OBS: começa a gravar com a leitura, troca de cena e marca capítulos
   pelo roteiro. No fim, as legendas `.srt` saem prontas.
 - **Controle pelo celular.** Abra pelo QR code, sem instalar nada: texto ao vivo e todos os controles na mão.

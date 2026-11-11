@@ -1,7 +1,7 @@
 {
   "name": "inpromptu",
   "productName": "InPromptu",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "O teleprompter que acompanha a sua voz: gratuito, offline e de código aberto, para Windows.",
   "main": "main.js",
   "author": {

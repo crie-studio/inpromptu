@@ -55,7 +55,7 @@
       "downloadUrl": "https://github.com/crie-studio/inpromptu/releases/latest",
       "installUrl": "__SITE__app/",
       "image": "__SITE__og-en.png",
-      "screenshot": "__SITE__editor.png",
+      "screenshot": "__SITE__editor-en.png",
       "author": {
         "@id": "__SITE__#autor"
       },
@@ -113,7 +113,7 @@
           "name": "Does it work with OBS Studio?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. InPromptu starts and stops the recording with the reading, switches scenes when the script has [cena: Name] and adds chapters. In the Windows app, the teleprompter can also be hidden from recordings."
+            "text": "Yes. InPromptu starts and stops the recording with the reading, switches scenes when the script has [scene: Name] and adds chapters. In the Windows app, the teleprompter can also be hidden from recordings."
           }
         },
         {
@@ -138,6 +138,14 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "Portuguese, English and Spanish in the web version. The Windows app also understands French, German and Italian. The classic and voice-activated modes work with any language."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the interface available in English?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The interface is in English and Portuguese and follows your system or browser language. You can change it under More → Language."
           }
         },
         {
@@ -759,8 +767,8 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
       </div>
       <p class="both reveal"><b>In both:</b> offline voice tracking, classic and voice-activated modes, mirrored full screen, camera background, second screen, 3-2-1 countdown, timer with a target, notes and sections, OBS, .srt subtitles and .inpromptu, .txt, .md and .pptx files.</p>
       <figure class="shot reveal">
-        <div class="frame"><div class="frame-bar" aria-hidden="true"><i></i><i></i><i></i></div><img src="../editor.png" alt="The InPromptu editor: pages on the left, the script in the middle and reading settings on the right" width="2334" height="1450" loading="lazy"></div>
-        <figcaption>The editor: pages on the left, the script in the middle and the reading mode on the right (interface in Portuguese).</figcaption>
+        <div class="frame"><div class="frame-bar" aria-hidden="true"><i></i><i></i><i></i></div><img src="../editor-en.png" alt="The InPromptu editor: pages on the left, the script in the middle and reading settings on the right" width="2334" height="1450" loading="lazy"></div>
+        <figcaption>The editor: pages on the left, the script in the middle and the reading mode on the right.</figcaption>
       </figure>
     </section>
 
@@ -787,10 +795,11 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
         <details><summary>Is InPromptu free?</summary><p>Yes. It is free and open source (MIT license), with no account, no ads and no paid version.</p></details>
         <details><summary>How does the teleprompter follow my voice?</summary><p>It recognizes the words you say, on your own computer, and matches them against your script. The text moves at your pace, stops when you stop and finds you again if you skip a sentence.</p></details>
         <details><summary>Does it work offline?</summary><p>Yes. After you download the voice model once (31 MB for Portuguese, 40 MB for English), recognition runs offline. No audio ever leaves your computer.</p></details>
-        <details><summary>Does it work with OBS Studio?</summary><p>Yes. InPromptu starts and stops the recording with the reading, switches scenes when the script has [cena: Name] and adds chapters. In the Windows app, the teleprompter can also be hidden from recordings.</p></details>
+        <details><summary>Does it work with OBS Studio?</summary><p>Yes. InPromptu starts and stops the recording with the reading, switches scenes when the script has [scene: Name] and adds chapters. In the Windows app, the teleprompter can also be hidden from recordings.</p></details>
         <details><summary>Is there a version for Mac, Linux, Chromebook or iPad?</summary><p>The web version runs in the browser on any system, best in Chrome and Edge. The installable app is for Windows 10 and 11.</p></details>
         <details><summary>Can I control it from my phone?</summary><p>Yes. Scan a QR code and control the reading from your phone browser, with nothing to install: pause, go back a line, jump to a section and change the speed.</p></details>
         <details><summary>Which languages does voice recognition understand?</summary><p>Portuguese, English and Spanish in the web version. The Windows app also understands French, German and Italian. The classic and voice-activated modes work with any language.</p></details>
+        <details><summary>Is the interface available in English?</summary><p>Yes. The interface is in English and Portuguese and follows your system or browser language. You can change it under <b>More → Language</b>.</p></details>
         <details><summary>Does it work with a beam-splitter teleprompter?</summary><p>Yes. Full screen can be mirrored horizontally, vertically or both, and a mirrored second screen can go to the glass monitor.</p></details>
         <details><summary>Does it make subtitles?</summary><p>Yes. When reading by voice, every word is logged at the moment it was said, and the .srt file is ready when you finish.</p></details>
       </div>
@@ -843,7 +852,7 @@ Hi! I am InPromptu. [smile] While you speak, I highlight each word and move the 
 If you stop to think, I wait. If you skip a sentence, I find you again.
 
 # In the studio
-[cena: Close] Recognition runs on your computer, with no internet. No audio ever leaves your machine.
+[scene: Close] Recognition runs on your computer, with no internet. No audio ever leaves your machine.
 
 When you finish, the subtitles are ready.`;
 
@@ -861,7 +870,7 @@ When you finish, the subtitles are ready.`;
       }
       for (const p of line.match(/\[[^\]]*\]?|[^\s[]+/g) || []) {
         if (p.startsWith('[')) {
-          const m = /^\[\s*(cena|cap[ií]tulo)\s*:/i.exec(p);
+          const m = /^\[\s*(cena|scene|cap[ií]tulo|chapter)\s*:/i.exec(p);
           out.push({ text: p, kind: 'n', act: !!m });
         } else out.push({ text: p, kind: 'w' });
       }
@@ -1372,13 +1381,13 @@ When you finish, the subtitles are ready.`;
   const SHOW = [
     { k: 'h', text: '# Opening' },
     { k: 't', text: 'Good evening! [smile] Tonight we talk about teleprompters.' },
-    { k: 'a', text: '[cena: Close]', scene: 'close', label: 'Camera 2 · Close' },
+    { k: 'a', text: '[scene: Close]', scene: 'close', label: 'Camera 2 · Close' },
     { k: 't', text: 'Notice how the camera cut to a close-up.' },
-    { k: 'c', text: '[capítulo: Backstage]', chapter: 'Backstage' },
+    { k: 'c', text: '[chapter: Backstage]', chapter: 'Backstage' },
     { k: 't', text: 'Backstage, each chapter becomes a marker in the recording.' },
-    { k: 'a', text: '[cena: Side]', scene: 'lado', label: 'Camera 3 · Side' },
+    { k: 'a', text: '[scene: Side]', scene: 'lado', label: 'Camera 3 · Side' },
     { k: 't', text: 'And you can change angles without touching the mouse.' },
-    { k: 'a', text: '[cena: Wide]', scene: 'geral', label: 'Camera 1 · Wide' },
+    { k: 'a', text: '[scene: Wide]', scene: 'geral', label: 'Camera 1 · Wide' },
     { k: 't', text: 'Enjoy the recording!' },
   ];
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);

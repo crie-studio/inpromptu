@@ -135,6 +135,12 @@ test('[cena: …] e [capítulo: …] viram ações para o OBS', () => {
   assert.deepStrictEqual(t[5].action, { type: 'chapter', name: 'Parte dois' });
 });
 
+test('[scene: …] e [chapter: …], em inglês, também', () => {
+  const t = tokenize('[Scene: Camera 2] Good morning. [chapter: Part two]');
+  assert.deepStrictEqual(t[0].action, { type: 'scene', name: 'Camera 2' });
+  assert.deepStrictEqual(t[5].action, { type: 'chapter', name: 'Part two' });
+});
+
 test('linhas com # viram seções, que não são lidas', () => {
   const t = tokenize('# Introdução geral\nTexto aqui.\n\n## Parte dois\nmais texto');
   assert.deepStrictEqual(sections(t), [{ index: 0, title: 'Introdução geral' }, { index: 4, title: 'Parte dois' }]);

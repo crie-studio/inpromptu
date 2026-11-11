@@ -13,6 +13,7 @@ const { extractNotes } = require('./src/pptx');
 const { ObsClient } = require('./src/obs');
 const { buildSrt } = require('./src/srt');
 const { grammarWords, tokenize } = require('./renderer/shared/text.js');
+const I18n = require('./renderer/shared/i18n.js');
 
 const APP_ROOT = __dirname;
 const PRELOAD = path.join(APP_ROOT, 'preload.js');
@@ -60,6 +61,10 @@ let recordingTimer = null;
 
 const userFile = (name) => path.join(app.getPath('userData'), name);
 
+/** Idioma da interface ('pt' ou 'en') e a tradução de um texto da interface. */
+const uiLang = () => I18n.resolve(settings?.get().uiLanguage, app.getLocale());
+const tr = (text, vars) => I18n.translate(text, uiLang(), vars);
+
 /* ───────────────────────── Protocolo app:// ───────────────────────── */
 
 function registerAppProtocol() {
@@ -73,7 +78,7 @@ function loadDoc() {
     const saved = JSON.parse(fs.readFileSync(userFile('documento.json'), 'utf8'));
     if (Array.isArray(saved.pages) && saved.pages.length) doc = sanitizeDoc(saved);
   } catch {
-    doc = { pages: [EXEMPLO], pageIndex: 0 };
+    doc = { pages: [uiLang() === 'en' ? EXAMPLE_EN : EXEMPLO], pageIndex: 0 };
   }
 }
 
@@ -104,7 +109,7 @@ function createEditor() {
     height: 760,
     minWidth: 860,
     minHeight: 560,
-    title: WINDOW_TITLE,
+    title: tr(WINDOW_TITLE),
     icon: ICON,
     backgroundColor: '#0f1013',
     show: false,
@@ -400,7 +405,7 @@ function createOutput() {
     skipTaskbar: true,
     focusable: false,
     show: false,
-    title: 'InPromptu — Segunda tela',
+    title: tr('InPromptu — Segunda tela'),
     webPreferences: { preload: PRELOAD, contextIsolation: true, sandbox: true, backgroundThrottling: false },
   });
   outputWin = win;
@@ -515,7 +520,7 @@ function saveSubtitles(r, videoPath) {
   }
 }
 
-const subtitlesDir = () => path.join(app.getPath('documents'), 'InPromptu', 'Legendas');
+const subtitlesDir = () => path.join(app.getPath('documents'), 'InPromptu', uiLang() === 'en' ? 'Subtitles' : 'Legendas');
 
 /* ───────────────────────── Sessão ───────────────────────── */
 
@@ -831,11 +836,11 @@ function registerIpc() {
 
   ipcMain.handle('file:open', async () => {
     const r = await dialog.showOpenDialog(editorWin, {
-      title: 'Abrir roteiro',
+      title: tr('Abrir roteiro'),
       properties: ['openFile'],
       filters: [
-        { name: 'Roteiros e textos', extensions: ['inpromptu', 'roteiro', 'txt', 'md', 'pptx'] },
-        { name: 'Todos os arquivos', extensions: ['*'] },
+        { name: tr('Roteiros e textos'), extensions: ['inpromptu', 'roteiro', 'txt', 'md', 'pptx'] },
+        { name: tr('Todos os arquivos'), extensions: ['*'] },
       ],
     });
     if (r.canceled || !r.filePaths[0]) return null;
@@ -846,9 +851,9 @@ function registerIpc() {
     let target = !saveAs && filePath && filePath.toLowerCase().endsWith('.inpromptu') ? filePath : null;
     if (!target) {
       const r = await dialog.showSaveDialog(editorWin, {
-        title: 'Salvar roteiro',
-        defaultPath: filePath ? filePath.replace(/\.[^.\\/]+$/, '.inpromptu') : 'Meu roteiro.inpromptu',
-        filters: [{ name: 'Roteiro do InPromptu', extensions: ['inpromptu'] }],
+        title: tr('Salvar roteiro'),
+        defaultPath: filePath ? filePath.replace(/\.[^.\\/]+$/, '.inpromptu') : `${tr('Meu roteiro')}.inpromptu`,
+        filters: [{ name: tr('Roteiro do InPromptu'), extensions: ['inpromptu'] }],
       });
       if (r.canceled || !r.filePath) return null;
       target = r.filePath;
@@ -925,7 +930,7 @@ function registerIpc() {
       // Capítulo na gravação do OBS a cada página nova.
       const s = settings.get();
       if (run.lastPage !== null && s.obsChapters && (run.obsRecording || run.obsExternal)) {
-        obsAction({ type: 'chapter', name: `Página ${d.page + 1}` });
+        obsAction({ type: 'chapter', name: tr(`Página ${d.page + 1}`) });
       }
       run.lastPage = d.page;
     }
@@ -1030,7 +1035,7 @@ function registerIpc() {
     if (/^https:\/\//.test(url)) shell.openExternal(url);
   });
   ipcMain.handle('app:openMicSettings', () => shell.openExternal('ms-settings:privacy-microphone'));
-  ipcMain.handle('app:info', () => ({ version: app.getVersion(), author: AUTHOR, website: WEBSITE, title: WINDOW_TITLE }));
+  ipcMain.handle('app:info', () => ({ version: app.getVersion(), author: AUTHOR, website: WEBSITE, title: tr(WINDOW_TITLE) }));
 }
 
 /* ───────────────────────── Ciclo de vida ───────────────────────── */
@@ -1092,6 +1097,11 @@ app.whenReady().then(async () => {
   migrateFromRoteiro();
   settings = new SettingsStore(app.getPath('userData'));
   models = new ModelManager(userFile('modelos'), (url) => net.fetch(url));
+  if (settings.firstRun) {
+    // Primeira vez: a fala no idioma do sistema, se houver modelo de voz para ele.
+    const locale = app.getLocale().slice(0, 2).toLowerCase();
+    if (models.list().some((m) => m.id === locale)) settings.set({ language: locale });
+  }
   remote = new RemoteServer({
     htmlPath: path.join(APP_ROOT, 'renderer', 'remote.html'),
     iconPath: path.join(APP_ROOT, 'assets', 'icon.png'),
@@ -1136,3 +1146,13 @@ Cole o seu texto aqui, escolha o modo de leitura e clique em Iniciar. No rastrea
 O que estiver entre colchetes é uma nota para você e não precisa ser lido. [pausa] Linhas que começam com cerquilha viram seções: as teclas de um a nove pulam direto para elas.
 
 Quando terminar, a sobreposição fecha sozinha.`;
+
+const EXAMPLE_EN = `# Welcome to InPromptu
+Hi! This is InPromptu, the teleprompter that follows your voice. [smile]
+
+Paste your text here, choose the reading mode and click Start. In voice tracking, each word is highlighted as you speak and the text moves up at your pace. If you skip a sentence, InPromptu finds you again.
+
+# Tips
+Anything in brackets is a note for you and doesn't need to be read. [pause] Lines that start with a hash sign become sections: keys one to nine jump straight to them.
+
+When you finish, the overlay closes by itself.`;

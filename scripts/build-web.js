@@ -190,6 +190,7 @@ function buildLanding() {
   land('sw-root.js', 'sw.js');                           // desliga o service worker antigo da raiz
   if (fs.existsSync(from('web', 'public'))) fs.cpSync(from('web', 'public'), OUT, { recursive: true }); // arquivos de verificação (Search Console, Bing)
   copy(from('docs', 'images', 'editor.png'), toSite('editor.png'));
+  copy(from('docs', 'images', 'editor-en.png'), toSite('editor-en.png'));
   for (const f of ['icon.png', 'icon-192.png', 'og.png', 'og-en.png']) copy(from('assets', f), toSite(f));
 }
 

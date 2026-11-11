@@ -1,5 +1,13 @@
 # Novidades
 
+## 2.2.0
+
+- **Interface em inglês**: o app, a versão web e a tela do celular agora também estão em inglês. O idioma segue o do
+  sistema (ou do navegador) e pode ser trocado em *Mais → Idioma*. Na primeira vez, o idioma da fala também segue o
+  do sistema.
+- O roteiro aceita `[scene: Nome]` e `[chapter: Nome]`, além de `[cena: …]` e `[capítulo: …]`.
+- Versão web: trocar uma opção e recarregar a página logo em seguida não perde mais a mudança.
+
 ## 2.1.0
 
 - **Versão web**: o InPromptu agora também roda no navegador, em <https://crie-studio.github.io/inpromptu/app/>, com o

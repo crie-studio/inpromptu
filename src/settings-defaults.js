@@ -3,6 +3,9 @@
 // e pela versão web (web/hub.js).
 
 const DEFAULTS = {
+  // Interface
+  uiLanguage: 'auto',        // auto (idioma do sistema) | pt | en
+
   // Guia
   mode: 'tracking',          // tracking | classic | voice
   speed: 2.5,                // palavras por segundo (clássico / ativado por voz)
