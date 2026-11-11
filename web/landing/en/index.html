@@ -1,19 +1,166 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>InPromptu</title>
+<title>InPromptu: free teleprompter that follows your voice (Windows and web)</title>
 <link rel="icon" href="../icon.png">
 <link rel="apple-touch-icon" href="../icon-192.png">
+<link rel="canonical" href="__SITE__en/">
+<link rel="alternate" hreflang="pt-BR" href="__SITE__">
+<link rel="alternate" hreflang="en" href="__SITE__en/">
+<link rel="alternate" hreflang="x-default" href="__SITE__">
 <meta name="theme-color" content="#0b0c10">
 <meta property="og:type" content="website">
-<meta property="og:title" content="InPromptu">
-<meta property="og:description" content="O teleprompter que acompanha a sua voz: gratuito, offline e de código aberto, para Windows e para o navegador.">
-<meta property="og:image" content="https://crie-studio.github.io/inpromptu/icon.png">
-<meta property="og:url" content="https://crie-studio.github.io/inpromptu/sobre/">
-<meta name="twitter:card" content="summary">
-<meta name="description" content="O teleprompter que acompanha a sua voz: gratuito, offline e de código aberto, para Windows e para o navegador.">
+<meta property="og:title" content="InPromptu: the teleprompter that follows your voice">
+<meta property="og:site_name" content="InPromptu">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="pt_BR">
+<meta property="og:description" content="The teleprompter that follows your voice: free, offline and open source, for Windows and the browser.">
+<meta property="og:image" content="__SITE__og-en.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="InPromptu, the teleprompter that follows your voice">
+<meta property="og:url" content="__SITE__en/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Free, open-source teleprompter that follows your voice, offline. For Windows and the browser, with OBS, .srt subtitles, mirrored screen and phone remote.">
+<meta name="author" content="Luiz Felipe Pitzer">
+<script>if (/[?&]ler=/.test(location.search)) location.replace('../app/' + location.search);</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "__SITE__#app",
+      "name": "InPromptu",
+      "alternateName": "InPromptu teleprompter",
+      "description": "Free, open-source teleprompter that follows your voice with offline speech recognition, for Windows and the browser.",
+      "url": "__SITE__en/",
+      "applicationCategory": "MultimediaApplication",
+      "applicationSubCategory": "Teleprompter",
+      "operatingSystem": "Windows 10, Windows 11, web browser (Chrome, Edge, Firefox, Safari)",
+      "softwareVersion": "__VERSION__",
+      "inLanguage": [
+        "pt-BR",
+        "en"
+      ],
+      "isAccessibleForFree": true,
+      "license": "https://opensource.org/licenses/MIT",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "downloadUrl": "https://github.com/crie-studio/inpromptu/releases/latest",
+      "installUrl": "__SITE__app/",
+      "image": "__SITE__og-en.png",
+      "screenshot": "__SITE__editor.png",
+      "author": {
+        "@id": "__SITE__#autor"
+      },
+      "sameAs": [
+        "https://github.com/crie-studio/inpromptu"
+      ],
+      "featureList": [
+        "Offline voice tracking, word by word",
+        "OBS Studio integration: recording, scenes and chapters",
+        "Automatic .srt subtitles",
+        "Mirrored full screen and second screen for beam-splitter teleprompters",
+        "Phone remote control",
+        "Stage directions and sections in the script"
+      ]
+    },
+    {
+      "@type": "Person",
+      "@id": "__SITE__#autor",
+      "name": "Luiz Felipe Pitzer",
+      "url": "https://lfp.app.br",
+      "sameAs": [
+        "https://github.com/crie-studio"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "__SITE__en/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is InPromptu free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. It is free and open source (MIT license), with no account, no ads and no paid version."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does the teleprompter follow my voice?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It recognizes the words you say, on your own computer, and matches them against your script. The text moves at your pace, stops when you stop and finds you again if you skip a sentence."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it work offline?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. After you download the voice model once (31 MB for Portuguese, 40 MB for English), recognition runs offline. No audio ever leaves your computer."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it work with OBS Studio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. InPromptu starts and stops the recording with the reading, switches scenes when the script has [cena: Name] and adds chapters. In the Windows app, the teleprompter can also be hidden from recordings."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is there a version for Mac, Linux, Chromebook or iPad?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The web version runs in the browser on any system, best in Chrome and Edge. The installable app is for Windows 10 and 11."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I control it from my phone?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Scan a QR code and control the reading from your phone browser, with nothing to install: pause, go back a line, jump to a section and change the speed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which languages does voice recognition understand?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Portuguese, English and Spanish in the web version. The Windows app also understands French, German and Italian. The classic and voice-activated modes work with any language."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it work with a beam-splitter teleprompter?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Full screen can be mirrored horizontally, vertically or both, and a mirrored second screen can go to the glass monitor."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it make subtitles?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. When reading by voice, every word is logged at the moment it was said, and the .srt file is ready when you finish."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -201,7 +348,7 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
 .win { position: absolute; border-radius: 6px; background: #3a4152; overflow: hidden; }
 .win::before { content: ""; display: block; height: 10%; background: #4a5266; }
 .win.obs { left: 5%; top: 30%; width: 50%; height: 60%; }
-.win.obs::after { content: "OBS · Programa"; position: absolute; left: 6%; top: 1.5%; font: 500 9px/1 var(--mono); color: #c9cbd6; }
+.win.obs::after { content: "OBS · Program"; position: absolute; left: 6%; top: 1.5%; font: 500 9px/1 var(--mono); color: #c9cbd6; }
 .win.obs i { position: absolute; left: 6%; right: 6%; top: 20%; bottom: 10%; border-radius: 3px; background: #1a1d26; }
 .win.obs i::after { content: ""; position: absolute; left: 38%; top: 22%; width: 24%; aspect-ratio: 1; border-radius: 50%; background: #5d6478; box-shadow: 0 2.6em 0 1.2em #5d6478; }
 .win.doc { right: 6%; top: 18%; width: 34%; height: 50%; }
@@ -334,6 +481,15 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
 .facts b { font-family: var(--display); font-size: var(--s-2); font-stretch: 82%; font-variant-numeric: tabular-nums; line-height: 1; }
 .facts span { font-size: 14px; color: var(--dim); }
 
+/* Perguntas */
+.faq { display: grid; border-top: 1px solid var(--rule); max-width: 900px; }
+.faq details { border-bottom: 1px solid var(--rule); }
+.faq summary { display: flex; align-items: baseline; gap: 14px; padding: 20px 0; cursor: pointer; list-style: none; font: 700 var(--s-1)/1.25 var(--display); font-stretch: 88%; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::before { content: "+"; flex: none; width: 1ch; font-family: var(--mono); color: var(--read); }
+.faq details[open] summary::before { content: "−"; }
+.faq p { padding: 0 0 22px calc(1ch + 14px); color: var(--dim); max-width: 62ch; }
+
 /* Fim */
 .final { display: grid; gap: 26px; justify-items: start; padding-block: clamp(64px, 10vw, 140px); border-top: 1px solid var(--rule); }
 .final h2 { font-size: clamp(36px, 1rem + 4vw, 76px); font-stretch: 80%; letter-spacing: -0.03em; line-height: .98; }
@@ -391,28 +547,30 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
       </svg>
       InPromptu
     </a>
-    <nav class="nav" aria-label="Seções">
-      <a href="#como-funciona">Como funciona</a>
-      <a href="#celular">Celular</a>
-      <a href="#versoes">Windows e web</a>
-      <a class="btn" href="https://github.com/crie-studio/inpromptu/releases/latest">Baixar</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#como-funciona">How it works</a>
+      <a href="#celular">Phone</a>
+      <a href="#versoes">Windows and web</a>
+      <a href="#perguntas">FAQ</a>
+      <a href="../" hreflang="pt-BR" lang="pt-BR">Português</a>
+      <a class="btn" href="https://github.com/crie-studio/inpromptu/releases/latest">Download</a>
     </nav>
   </header>
 
   <main>
     <section class="hero" id="abertura">
       <div class="hero-copy">
-        <p class="slug"><span class="tc" data-tc>00:00</span> Abertura <span class="rule"></span></p>
-        <h1 id="headline">O teleprompter que acompanha a sua voz.</h1>
-        <p class="lede">Você lê olhando para a câmera. O InPromptu escuta, destaca cada palavra e sobe o texto no seu ritmo. Se você para, ele espera. Se pula uma frase, ele te reencontra. Tudo roda no seu computador, sem internet.</p>
+        <p class="slug"><span class="tc" data-tc>00:00</span> Opening <span class="rule"></span></p>
+        <h1 id="headline">The teleprompter that follows your voice.</h1>
+        <p class="lede">A free teleprompter for Windows and the browser. You read while looking at the camera, and InPromptu listens, highlights each word and moves the text at your pace. If you pause, it waits. If you skip a sentence, it finds you again. Voice recognition runs on your computer, with no internet.</p>
         <div class="ctas">
-          <a class="btn primary" href="https://github.com/crie-studio/inpromptu/releases/latest"><svg aria-hidden="true"><use href="#i-down-arrow"/></svg>Baixar para Windows</a>
-          <a class="btn" href="../"><svg aria-hidden="true"><use href="#i-globe"/></svg>Usar no navegador</a>
+          <a class="btn primary" href="https://github.com/crie-studio/inpromptu/releases/latest"><svg aria-hidden="true"><use href="#i-down-arrow"/></svg>Download for Windows</a>
+          <a class="btn" href="../app/"><svg aria-hidden="true"><use href="#i-globe"/></svg>Use in your browser</a>
         </div>
-        <p class="fine">Grátis · código aberto (MIT) · Windows 10 e 11 · Chrome, Edge, Firefox e Safari</p>
+        <p class="fine">Free · open source (MIT) · Windows 10 and 11 · Chrome, Edge, Firefox and Safari</p>
       </div>
 
-      <div class="prompter" aria-label="Demonstração do teleprompter">
+      <div class="prompter" aria-label="Teleprompter demo">
         <div class="glass">
           <div class="pt hero-pt" id="pt-hero"><div class="pt-text"></div></div>
           <div class="readline" aria-hidden="true"></div>
@@ -420,65 +578,65 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
             <canvas id="wave" width="184" height="68" aria-hidden="true"></canvas>
             <span class="status" id="status" aria-live="polite"></span>
             <div class="track" aria-hidden="true"><i id="track"></i></div>
-            <span class="time" id="time">0:00 · faltam 0:30</span>
+            <span class="time" id="time">0:00 · 0:30 left</span>
           </div>
         </div>
         <div class="controls">
-          <button class="chip" id="b-play" type="button"><svg aria-hidden="true"><use href="#i-pause"/></svg><span>Pausar</span></button>
-          <button class="chip" id="b-skip" type="button"><svg aria-hidden="true"><use href="#i-skip"/></svg>Pular uma frase</button>
-          <label class="rate" for="rate">Ritmo <input id="rate" type="range" min="1.6" max="4.4" step="0.1" value="2.9"> <output id="rate-out" for="rate">2,9 pal/s</output></label>
+          <button class="chip" id="b-play" type="button"><svg aria-hidden="true"><use href="#i-pause"/></svg><span>Pause</span></button>
+          <button class="chip" id="b-skip" type="button"><svg aria-hidden="true"><use href="#i-skip"/></svg>Skip a sentence</button>
+          <label class="rate" for="rate">Pace <input id="rate" type="range" min="1.6" max="4.4" step="0.1" value="2.9"> <output id="rate-out" for="rate">2.9 words/s</output></label>
         </div>
         <details class="mine">
-          <summary>Testar com o meu texto</summary>
-          <label for="mytext" class="caption">Use [colchetes] para notas e # no começo da linha para seções.</label>
+          <summary>Try it with your own text</summary>
+          <label for="mytext" class="caption">Use [brackets] for notes and # at the start of a line for sections.</label>
           <textarea id="mytext"></textarea>
-          <button class="btn" id="b-mine" type="button">Ler este texto</button>
+          <button class="btn" id="b-mine" type="button">Read this text</button>
         </details>
-        <p class="caption">Demonstração com uma voz simulada. No app, quem dita o ritmo é você.</p>
+        <p class="caption">Demo with a simulated voice. In the app, you set the pace.</p>
       </div>
     </section>
 
     <section class="seg" id="como-funciona">
       <div class="seg-head reveal">
-        <p class="slug"><span class="tc" data-tc>00:22</span> Como funciona <span class="rule"></span></p>
-        <h2>Ele lê junto com você, palavra por palavra.</h2>
-        <p class="lede">Não é rolagem por volume. O InPromptu sabe qual palavra você está dizendo e onde ela está no roteiro.</p>
+        <p class="slug"><span class="tc" data-tc>00:22</span> How it works <span class="rule"></span></p>
+        <h2>It reads along with you, word by word.</h2>
+        <p class="lede">It doesn't just scroll when it hears sound. InPromptu knows which word you are saying and where it is in your script.</p>
       </div>
       <ol class="steps reveal">
-        <li><b>Ouve</b><p>Um detector de voz (Silero) separa fala de ruído a cada 32 milissegundos. No silêncio, o texto para.</p></li>
-        <li><b>Reconhece</b><p>O reconhecedor (Vosk) só procura as palavras do seu roteiro. Acerta nomes difíceis e responde em cerca de meio segundo.</p></li>
-        <li><b>Alinha</b><p>A frase ouvida é comparada inteira com o texto. Palavras trocadas, esquecidas ou a mais não tiram você do lugar.</p></li>
-        <li><b>Acompanha</b><p>A posição anda no seu ritmo, que o app aprende e guarda para a próxima leitura.</p></li>
+        <li><b>Listens</b><p>A voice detector (Silero) tells speech from noise every 32 milliseconds. When you go quiet, the text stops.</p></li>
+        <li><b>Recognizes</b><p>The recognizer (Vosk) only looks for the words in your script. It gets hard names right and responds in about half a second.</p></li>
+        <li><b>Aligns</b><p>Each phrase it hears is matched against the whole text. Swapped, skipped or extra words don't lose your place.</p></li>
+        <li><b>Follows</b><p>Your position moves at your pace, which the app learns and remembers for next time.</p></li>
       </ol>
       <div class="align-fig reveal">
-        <div class="align-box"><canvas id="align" width="720" height="440" aria-label="Matriz de alinhamento entre o que foi dito e o roteiro"></canvas></div>
+        <div class="align-box"><canvas id="align" width="720" height="440" aria-label="Alignment matrix between what was said and the script"></canvas></div>
         <div class="legend">
-          <p class="caption">O alinhamento de verdade, com a pontuação do app: em cima, o que o reconhecedor ouviu; à esquerda, o roteiro. O caminho amarelo é onde você está.</p>
-          <div><b class="k-ok">Certa</b><span>"sobe" foi ouvida como "sob". As duas são parecidas o bastante e contam como a mesma palavra.</span></div>
-          <div><b class="k-om">Esquecida</b><span>"e" não foi dita. O roteiro segue em frente sem esperar por ela.</span></div>
-          <div><b class="k-ex">A mais</b><span>"é" foi dita mas não está no roteiro. É ignorada e a posição não se mexe.</span></div>
+          <p class="caption">The real alignment, with the app's own scoring: on top, what the recognizer heard; on the left, the script. The yellow path is where you are.</p>
+          <div><b class="k-ok">Match</b><span>"moves" was heard as "move". They are close enough to count as the same word.</span></div>
+          <div><b class="k-om">Skipped</b><span>"and" was not said. The script moves on without waiting for it.</span></div>
+          <div><b class="k-ex">Extra</b><span>"uh" was said but is not in the script. It is ignored and your position stays put.</span></div>
         </div>
       </div>
     </section>
 
     <section class="seg" id="onde">
       <div class="seg-head reveal">
-        <p class="slug"><span class="tc" data-tc>01:04</span> Onde o texto aparece <span class="rule"></span></p>
-        <h2>Perto da câmera, por cima de tudo ou no vidro do teleprompter.</h2>
+        <p class="slug"><span class="tc" data-tc>01:04</span> Where the text shows up <span class="rule"></span></p>
+        <h2>Near the camera, on top of everything, or on the teleprompter glass.</h2>
       </div>
       <div class="modes">
-        <div class="mode-list" role="group" aria-label="Modos de exibição">
-          <button type="button" data-step="0" aria-pressed="true"><em>Windows</em><b>Faixa no topo</b><span>Colada no topo da tela, logo abaixo da webcam. Seus olhos parecem olhar para a lente.</span></button>
-          <button type="button" data-step="1" aria-pressed="false"><em>Windows e web</em><b>Janela flutuante</b><span>Sempre por cima dos outros programas, inclusive do OBS.</span></button>
-          <button type="button" data-step="2" aria-pressed="false"><em>Windows e web</em><b>Tela cheia espelhada</b><span>Para o vidro do teleprompter, com a câmera ou o OBS por trás.</span></button>
-          <button type="button" data-step="3" aria-pressed="false"><em>Windows e web</em><b>Segunda tela</b><span>Outra tela cheia, em outro monitor, acompanhando a mesma leitura.</span></button>
+        <div class="mode-list" role="group" aria-label="Display modes">
+          <button type="button" data-step="0" aria-pressed="true"><em>Windows</em><b>Strip at the top</b><span>Right at the top of the screen, under the webcam. Your eyes look like they are on the lens.</span></button>
+          <button type="button" data-step="1" aria-pressed="false"><em>Windows and web</em><b>Floating window</b><span>Always on top of other apps, OBS included.</span></button>
+          <button type="button" data-step="2" aria-pressed="false"><em>Windows and web</em><b>Mirrored full screen</b><span>For teleprompter glass, with the camera or OBS behind the text.</span></button>
+          <button type="button" data-step="3" aria-pressed="false"><em>Windows and web</em><b>Second screen</b><span>Another full screen, on another monitor, following the same reading.</span></button>
         </div>
         <div class="rig" id="rig" data-step="0">
           <div class="mon" id="mon" data-step="0">
             <div class="mon-screen">
               <div class="desk"><div class="win obs"><i></i></div><div class="win doc"></div></div>
               <div class="mp"><div class="pt" id="pt-mini"><div class="pt-text"></div></div></div>
-              <span class="mp-label">espelhado</span>
+              <span class="mp-label">mirrored</span>
               <span class="cam" aria-hidden="true"></span>
             </div>
             <div class="mon-stand"></div>
@@ -493,17 +651,17 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
 
     <section class="seg" id="estudio">
       <div class="seg-head reveal">
-        <p class="slug"><span class="tc" data-tc>01:33</span> O roteiro dirige o estúdio <span class="rule"></span></p>
-        <h2>Escreva a direção no texto. O OBS obedece.</h2>
-        <p class="lede">Notas entre colchetes aparecem para você e não são lidas. Com o OBS conectado, a leitura começa a gravação, troca de cena e marca capítulos sozinha.</p>
+        <p class="slug"><span class="tc" data-tc>01:33</span> Teleprompter with OBS <span class="rule"></span></p>
+        <h2>Write the directions in the script. OBS follows them.</h2>
+        <p class="lede">Notes in brackets show up for you and are not read. With OBS connected, reading starts the recording, switches scenes and adds chapters on its own.</p>
       </div>
       <div class="studio reveal">
         <div class="file">
-          <div class="file-head"><span class="dots"><i></i><i></i><i></i></span>episodio-12.inpromptu</div>
+          <div class="file-head"><span class="dots"><i></i><i></i><i></i></span>episode-12.inpromptu</div>
           <ol class="script" id="obs-script"></ol>
         </div>
         <div class="obs">
-          <div class="obs-head"><span class="tally" aria-hidden="true"></span>OBS · Programa<b id="obs-scene">Geral</b></div>
+          <div class="obs-head"><span class="tally" aria-hidden="true"></span>OBS · Program<b id="obs-scene">Wide</b></div>
           <div class="program" id="program" data-scene="geral">
             <svg viewBox="0 0 160 90" aria-hidden="true">
               <rect width="160" height="90" fill="#171a22"/>
@@ -514,7 +672,7 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
               <path d="M53 0v90M107 0v90M0 30h160M0 60h160" stroke="#ffffff10" stroke-width=".4"/>
             </svg>
             <div class="flash" id="flash"></div>
-            <span class="lower" id="lower">Câmera 1 · Geral</span>
+            <span class="lower" id="lower">Camera 1 · Wide</span>
           </div>
           <div class="recbar"><span><span class="rec">● REC</span> <span id="rec-time">00:00:00</span></span><div class="rtrack" id="rtrack"><div class="fill" id="rfill"></div></div></div>
           <ul class="events" id="events" aria-live="polite"></ul>
@@ -522,14 +680,14 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
       </div>
       <div class="subs reveal">
         <div class="seg-head">
-          <h3>E as legendas saem prontas.</h3>
-          <p class="lede">Cada palavra fica registrada no instante em que você a disse. No fim, o arquivo .srt está pronto para o editor de vídeo, com o mesmo nome da gravação.</p>
+          <h3>And the subtitles come out ready.</h3>
+          <p class="lede">Each word is logged at the moment you said it. When you finish, the .srt file is ready for your video editor, with the same name as the recording.</p>
         </div>
         <div class="file">
-          <div class="file-head"><span class="dots"><i></i><i></i><i></i></span>legendas.srt <span style="margin-left:auto;color:var(--faint)">ao vivo, da demonstração lá de cima</span></div>
+          <div class="file-head"><span class="dots"><i></i><i></i><i></i></span>subtitles.srt <span style="margin-left:auto;color:var(--faint)">live, from the demo at the top</span></div>
           <pre class="srt" id="srt"><span class="cue"><b>1</b>
 <b>00:00:00,620 --> 00:00:02,980</b>
-<span>Oi! Eu sou o InPromptu.</span></span></pre>
+<span>Hi! I am InPromptu.</span></span></pre>
         </div>
       </div>
     </section>
@@ -538,34 +696,34 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
       <div class="remote">
         <div class="remote-copy">
           <div class="seg-head reveal">
-            <p class="slug"><span class="tc" data-tc>02:13</span> Celular <span class="rule"></span></p>
-            <h2>O controle remoto é o seu celular.</h2>
-            <p class="lede">Aponte a câmera para o QR code e acompanhe a leitura pelo navegador do celular, sem instalar nada. Pausar, voltar uma linha, pular para uma seção, mudar a velocidade: está tudo ali.</p>
-            <p class="lede">No app de Windows, pela rede Wi-Fi. Na versão web, pela internet, em qualquer rede.</p>
+            <p class="slug"><span class="tc" data-tc>02:13</span> Phone remote <span class="rule"></span></p>
+            <h2>Your phone is the remote control.</h2>
+            <p class="lede">Point your camera at the QR code and follow the reading in your phone's browser, with nothing to install. Pause, go back a line, jump to a section, change the speed: it's all there.</p>
+            <p class="lede">In the Windows app, over Wi-Fi. In the web version, over the internet, on any network.</p>
           </div>
-          <p class="caption">Este celular funciona: os botões controlam a demonstração lá do começo da página.</p>
+          <p class="caption">This phone works: its buttons control the demo at the top of the page.</p>
           <div class="qr">
-            <canvas id="qr" width="224" height="224" aria-label="QR code da versão web"></canvas>
-            <p>Abra a versão web no celular:<br><a href="../">crie-studio.github.io/inpromptu</a></p>
+            <canvas id="qr" width="224" height="224" aria-label="QR code for the web version"></canvas>
+            <p>Open the web version on your phone:<br><a href="../app/">crie-studio.github.io/inpromptu/app</a></p>
           </div>
         </div>
-        <div class="phone" aria-label="Controle pelo celular (demonstração)">
+        <div class="phone" aria-label="Phone remote (demo)">
           <div class="ph">
-            <div class="ph-top"><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><use href="#logo"/><g fill="#ffd60a"><rect x="278" y="234" width="26" height="44" rx="13"/><rect x="316" y="204" width="26" height="104" rx="13"/><rect x="354" y="222" width="26" height="68" rx="13"/><rect x="392" y="242" width="26" height="28" rx="13"/></g></svg>InPromptu<span class="dot" title="Conectado"></span></div>
-            <div class="ph-status"><span class="ph-chip" id="ph-chip">Lendo</span><span>Página 1/1</span><span class="t" id="ph-time">0:00</span></div>
+            <div class="ph-top"><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><use href="#logo"/><g fill="#ffd60a"><rect x="278" y="234" width="26" height="44" rx="13"/><rect x="316" y="204" width="26" height="104" rx="13"/><rect x="354" y="222" width="26" height="68" rx="13"/><rect x="392" y="242" width="26" height="28" rx="13"/></g></svg>InPromptu<span class="dot" title="Connected"></span></div>
+            <div class="ph-status"><span class="ph-chip" id="ph-chip">Reading</span><span>Page 1/1</span><span class="t" id="ph-time">0:00</span></div>
             <div class="pt ph-pt" id="pt-phone"><div class="pt-text"></div></div>
             <div class="ph-secs" id="ph-secs"></div>
             <div class="ph-nav">
-              <button type="button" disabled aria-label="Página anterior"><svg aria-hidden="true"><use href="#i-prev"/></svg><span>Anterior</span></button>
-              <button type="button" id="ph-up" aria-label="Voltar uma linha"><svg aria-hidden="true"><use href="#i-up"/></svg><span>Linha</span></button>
-              <button type="button" class="play" id="ph-play" aria-label="Pausar ou continuar"><svg aria-hidden="true"><use href="#i-pause"/></svg><span>Pausar</span></button>
-              <button type="button" id="ph-down" aria-label="Avançar uma linha"><svg aria-hidden="true"><use href="#i-down"/></svg><span>Linha</span></button>
-              <button type="button" disabled aria-label="Próxima página"><svg aria-hidden="true"><use href="#i-next"/></svg><span>Próxima</span></button>
+              <button type="button" disabled aria-label="Previous page"><svg aria-hidden="true"><use href="#i-prev"/></svg><span>Previous</span></button>
+              <button type="button" id="ph-up" aria-label="Back one line"><svg aria-hidden="true"><use href="#i-up"/></svg><span>Line</span></button>
+              <button type="button" class="play" id="ph-play" aria-label="Pause or resume"><svg aria-hidden="true"><use href="#i-pause"/></svg><span>Pause</span></button>
+              <button type="button" id="ph-down" aria-label="Forward one line"><svg aria-hidden="true"><use href="#i-down"/></svg><span>Line</span></button>
+              <button type="button" disabled aria-label="Next page"><svg aria-hidden="true"><use href="#i-next"/></svg><span>Next</span></button>
             </div>
             <div class="ph-tools">
-              <button type="button" class="stop" id="ph-stop"><svg aria-hidden="true"><use href="#i-stop"/></svg><span>Parar</span></button>
-              <button type="button" id="ph-restart"><svg aria-hidden="true"><use href="#i-restart"/></svg><span>Do início</span></button>
-              <button type="button" id="ph-faster"><span style="font-size:15px;color:var(--text)">+</span><span>Mais rápido</span></button>
+              <button type="button" class="stop" id="ph-stop"><svg aria-hidden="true"><use href="#i-stop"/></svg><span>Stop</span></button>
+              <button type="button" id="ph-restart"><svg aria-hidden="true"><use href="#i-restart"/></svg><span>Restart</span></button>
+              <button type="button" id="ph-faster"><span style="font-size:15px;color:var(--text)">+</span><span>Faster</span></button>
             </div>
           </div>
         </div>
@@ -574,59 +732,77 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
 
     <section class="seg" id="versoes">
       <div class="seg-head reveal">
-        <p class="slug"><span class="tc" data-tc>02:49</span> Windows e web <span class="rule"></span></p>
-        <h2>Instale no Windows ou abra no navegador.</h2>
+        <p class="slug"><span class="tc" data-tc>02:49</span> Windows and web <span class="rule"></span></p>
+        <h2>Install on Windows or open in your browser.</h2>
       </div>
       <div class="versions reveal">
         <article class="ver">
-          <header><h3>Windows</h3><span>instalador · 123 MB</span></header>
+          <header><h3>Windows</h3><span>installer · 123 MB</span></header>
           <ul>
-            <li>A faixa no topo da tela, perto da câmera</li>
-            <li>Escondido das gravações e do compartilhamento de tela (Teams, Zoom, Meet, OBS)</li>
-            <li>Atalhos que funcionam com outro programa na frente</li>
-            <li>Celular pela rede Wi-Fi</li>
+            <li>The strip at the top of the screen, near the camera</li>
+            <li>Hidden from recordings and screen sharing (Teams, Zoom, Meet, OBS)</li>
+            <li>Shortcuts that work while another app is in front</li>
+            <li>Phone remote over Wi-Fi</li>
           </ul>
-          <a class="btn primary" href="https://github.com/crie-studio/inpromptu/releases/latest"><svg aria-hidden="true"><use href="#i-down-arrow"/></svg>Baixar para Windows</a>
+          <a class="btn primary" href="https://github.com/crie-studio/inpromptu/releases/latest"><svg aria-hidden="true"><use href="#i-down-arrow"/></svg>Download for Windows</a>
         </article>
         <article class="ver">
-          <header><h3>Navegador</h3><span>Chrome · Edge · Firefox · Safari</span></header>
+          <header><h3>Browser</h3><span>Chrome · Edge · Firefox · Safari</span></header>
           <ul>
-            <li>Nada para instalar; pode virar um app pelo navegador</li>
-            <li>Janela flutuante por cima de tudo (Chrome e Edge)</li>
-            <li>Celular pela internet, em qualquer rede</li>
-            <li>Funciona sem internet depois da primeira visita</li>
+            <li>Nothing to install; it can become an app from your browser</li>
+            <li>Floating window on top of everything (Chrome and Edge)</li>
+            <li>Phone remote over the internet, on any network</li>
+            <li>Works offline after the first visit</li>
           </ul>
-          <a class="btn" href="../"><svg aria-hidden="true"><use href="#i-globe"/></svg>Usar no navegador</a>
+          <a class="btn" href="../app/"><svg aria-hidden="true"><use href="#i-globe"/></svg>Use in your browser</a>
         </article>
       </div>
-      <p class="both reveal"><b>Nos dois:</b> rastreamento de voz offline, modo clássico e ativado por voz, tela cheia espelhada, câmera no fundo, segunda tela, contagem 3-2-1, cronômetro com meta, notas e seções, OBS, legendas .srt e arquivos .inpromptu, .txt, .md e .pptx.</p>
+      <p class="both reveal"><b>In both:</b> offline voice tracking, classic and voice-activated modes, mirrored full screen, camera background, second screen, 3-2-1 countdown, timer with a target, notes and sections, OBS, .srt subtitles and .inpromptu, .txt, .md and .pptx files.</p>
       <figure class="shot reveal">
-        <div class="frame"><div class="frame-bar" aria-hidden="true"><i></i><i></i><i></i></div><img src="editor.png" alt="O editor do InPromptu: páginas à esquerda, o roteiro no centro e as configurações de leitura à direita" width="2334" height="1450" loading="lazy"></div>
-        <figcaption>O editor: as páginas à esquerda, o roteiro no centro e o modo de leitura à direita.</figcaption>
+        <div class="frame"><div class="frame-bar" aria-hidden="true"><i></i><i></i><i></i></div><img src="../editor.png" alt="The InPromptu editor: pages on the left, the script in the middle and reading settings on the right" width="2334" height="1450" loading="lazy"></div>
+        <figcaption>The editor: pages on the left, the script in the middle and the reading mode on the right (interface in Portuguese).</figcaption>
       </figure>
     </section>
 
     <section class="seg" id="privacidade">
       <div class="seg-head reveal">
-        <p class="slug"><span class="tc" data-tc>03:31</span> Privacidade <span class="rule"></span></p>
-        <h2>Sua voz não sai do seu computador.</h2>
-        <p class="lede">O reconhecimento roda no seu processador. O modelo de voz é baixado uma vez e depois tudo funciona sem internet. Não há conta, telemetria nem estatística de uso, e o código é aberto para quem quiser conferir.</p>
+        <p class="slug"><span class="tc" data-tc>03:31</span> Privacy <span class="rule"></span></p>
+        <h2>Your voice never leaves your computer.</h2>
+        <p class="lede">Recognition runs on your own processor. The voice model is downloaded once, and after that everything works offline. There is no account, no telemetry and no usage tracking, and the code is open for anyone to check.</p>
       </div>
       <div class="facts reveal">
-        <div><b class="mono">31 MB</b><span>o modelo de voz em português, baixado uma única vez</span></div>
-        <div><b class="mono">≈0,5 s</b><span>do que você diz até a palavra acender</span></div>
-        <div><b class="mono">32 ms</b><span>a janela do detector de voz</span></div>
-        <div><b class="mono">0 B</b><span>de áudio enviado para qualquer servidor</span></div>
+        <div><b class="mono">31 MB</b><span>the Portuguese voice model, downloaded once (English: 40 MB)</span></div>
+        <div><b class="mono">≈0.5 s</b><span>from what you say to the word lighting up</span></div>
+        <div><b class="mono">32 ms</b><span>the voice detector's window</span></div>
+        <div><b class="mono">0 B</b><span>of audio sent to any server</span></div>
+      </div>
+    </section>
+
+    <section class="seg" id="perguntas">
+      <div class="seg-head reveal">
+        <p class="slug"><span class="tc" data-tc>03:45</span> FAQ <span class="rule"></span></p>
+        <h2>Questions about the teleprompter.</h2>
+      </div>
+      <div class="faq reveal">
+        <details><summary>Is InPromptu free?</summary><p>Yes. It is free and open source (MIT license), with no account, no ads and no paid version.</p></details>
+        <details><summary>How does the teleprompter follow my voice?</summary><p>It recognizes the words you say, on your own computer, and matches them against your script. The text moves at your pace, stops when you stop and finds you again if you skip a sentence.</p></details>
+        <details><summary>Does it work offline?</summary><p>Yes. After you download the voice model once (31 MB for Portuguese, 40 MB for English), recognition runs offline. No audio ever leaves your computer.</p></details>
+        <details><summary>Does it work with OBS Studio?</summary><p>Yes. InPromptu starts and stops the recording with the reading, switches scenes when the script has [cena: Name] and adds chapters. In the Windows app, the teleprompter can also be hidden from recordings.</p></details>
+        <details><summary>Is there a version for Mac, Linux, Chromebook or iPad?</summary><p>The web version runs in the browser on any system, best in Chrome and Edge. The installable app is for Windows 10 and 11.</p></details>
+        <details><summary>Can I control it from my phone?</summary><p>Yes. Scan a QR code and control the reading from your phone browser, with nothing to install: pause, go back a line, jump to a section and change the speed.</p></details>
+        <details><summary>Which languages does voice recognition understand?</summary><p>Portuguese, English and Spanish in the web version. The Windows app also understands French, German and Italian. The classic and voice-activated modes work with any language.</p></details>
+        <details><summary>Does it work with a beam-splitter teleprompter?</summary><p>Yes. Full screen can be mirrored horizontally, vertically or both, and a mirrored second screen can go to the glass monitor.</p></details>
+        <details><summary>Does it make subtitles?</summary><p>Yes. When reading by voice, every word is logged at the moment it was said, and the .srt file is ready when you finish.</p></details>
       </div>
     </section>
 
     <section class="final" id="baixar">
-      <p class="slug"><span class="tc" data-tc>03:58</span> Encerramento <span class="rule"></span></p>
-      <h2>Grave a próxima tomada <em>olhando para a câmera.</em></h2>
+      <p class="slug"><span class="tc" data-tc>03:58</span> Closing <span class="rule"></span></p>
+      <h2>Record your next take <em>looking at the camera.</em></h2>
       <div class="ctas">
-        <a class="btn primary" href="https://github.com/crie-studio/inpromptu/releases/latest"><svg aria-hidden="true"><use href="#i-down-arrow"/></svg>Baixar para Windows</a>
-        <a class="btn" href="../"><svg aria-hidden="true"><use href="#i-globe"/></svg>Usar no navegador</a>
-        <a class="btn" href="https://github.com/crie-studio/inpromptu">Código no GitHub</a>
+        <a class="btn primary" href="https://github.com/crie-studio/inpromptu/releases/latest"><svg aria-hidden="true"><use href="#i-down-arrow"/></svg>Download for Windows</a>
+        <a class="btn" href="../app/"><svg aria-hidden="true"><use href="#i-globe"/></svg>Use in your browser</a>
+        <a class="btn" href="https://github.com/crie-studio/inpromptu">Source on GitHub</a>
       </div>
     </section>
   </main>
@@ -635,16 +811,17 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
     <div class="author">
       <div class="mono-lfp" aria-hidden="true">LFP</div>
       <div>
-        <small>Criado e desenvolvido por</small>
+        <small>Created and developed by</small>
         <strong>Luiz Felipe Pitzer</strong>
         <a href="https://lfp.app.br">lfp.app.br ↗</a>
       </div>
     </div>
     <div class="colophon">
-      <p><b>InPromptu 2.1.0</b> · código aberto, licença MIT · <a href="https://github.com/crie-studio/inpromptu">github.com/crie-studio/inpromptu</a></p>
-      <p>Feito com <a href="https://alphacephei.com/vosk/">Vosk</a> e <a href="https://github.com/ccoreilly/vosk-browser">vosk-browser</a> (Apache 2.0), <a href="https://github.com/snakers4/silero-vad">Silero VAD</a> e <a href="https://onnxruntime.ai">ONNX Runtime</a> (MIT), <a href="https://peerjs.com">PeerJS</a> e <a href="https://www.electronjs.org">Electron</a> (MIT) e a fonte OpenDyslexic (SIL OFL).</p>
-      <p>A ideia da faixa perto da câmera veio do <a href="https://github.com/f/textream">Textream</a>, de Fatih Kadir Akın.</p>
-      <p class="made">Esta página foi escrita com Claude Opus 5.5, da Anthropic. © 2026 Luiz Felipe Pitzer.</p>
+      <p><a href="../" hreflang="pt-BR" lang="pt-BR">Versão em português</a></p>
+      <p><b>InPromptu __VERSION__</b> · open source, MIT license · <a href="https://github.com/crie-studio/inpromptu">github.com/crie-studio/inpromptu</a></p>
+      <p>Built with <a href="https://alphacephei.com/vosk/">Vosk</a> and <a href="https://github.com/ccoreilly/vosk-browser">vosk-browser</a> (Apache 2.0), <a href="https://github.com/snakers4/silero-vad">Silero VAD</a> and <a href="https://onnxruntime.ai">ONNX Runtime</a> (MIT), <a href="https://peerjs.com">PeerJS</a> and <a href="https://www.electronjs.org">Electron</a> (MIT) and the OpenDyslexic font (SIL OFL).</p>
+      <p>The idea of a strip near the camera came from <a href="https://github.com/f/textream">Textream</a> by Fatih Kadir Akın.</p>
+      <p class="made">This page was written with Claude Opus 5.5, by Anthropic. © 2026 Luiz Felipe Pitzer.</p>
     </div>
   </footer>
 </div>
@@ -657,18 +834,18 @@ details.mine .btn { margin-top: 10px; min-height: 40px; font-size: 14px; }
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const fmt = (s) => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
-  const num = (n) => String(Math.round(n * 10) / 10).replace('.', ',');
+  const num = (n) => String(Math.round(n * 10) / 10);
 
   /* ───────── Roteiro: as mesmas regras do app (notas e seções não são lidas) ───────── */
-  const DEMO = `# Abertura
-Oi! Eu sou o InPromptu. [sorria] Enquanto você fala, eu destaco cada palavra e subo o texto no seu ritmo.
+  const DEMO = `# Opening
+Hi! I am InPromptu. [smile] While you speak, I highlight each word and move the text at your pace.
 
-Se você parar para pensar, eu espero. Se pular uma frase, eu te reencontro.
+If you stop to think, I wait. If you skip a sentence, I find you again.
 
-# No estúdio
-[cena: Close] O reconhecimento roda no seu computador, sem internet. Nenhum áudio sai da sua máquina.
+# In the studio
+[cena: Close] Recognition runs on your computer, with no internet. No audio ever leaves your machine.
 
-Quando você terminar, as legendas já estão prontas.`;
+When you finish, the subtitles are ready.`;
 
   function tokenize(src) {
     const out = [];
@@ -909,8 +1086,8 @@ Quando você terminar, as legendas já estão prontas.`;
     const words = tokens.filter((t) => t.kind === 'w').length || 1;
     const done = tokens.slice(0, Math.floor(reader.est)).filter((t) => t.kind === 'w').length;
     trackEl.style.width = `${Math.min(100, (done / words) * 100)}%`;
-    timeEl.textContent = `${fmt(voice.t)} · faltam ${fmt(remainingSeconds())}`;
-    statusEl.textContent = reader.searching > 0 ? 'Reencontrando…' : !voice.playing ? 'Pausado' : '';
+    timeEl.textContent = `${fmt(voice.t)} · ${fmt(remainingSeconds())} left`;
+    statusEl.textContent = reader.searching > 0 ? 'Finding you…' : !voice.playing ? 'Paused' : '';
     phoneUi();
   }
 
@@ -918,7 +1095,7 @@ Quando você terminar, as legendas já estão prontas.`;
   const playBtn = $('#b-play');
   function setPlaying(on) {
     voice.playing = on;
-    for (const [btn, label] of [[playBtn, on ? 'Pausar' : 'Continuar'], [$('#ph-play'), on ? 'Pausar' : 'Continuar']]) {
+    for (const [btn, label] of [[playBtn, on ? 'Pause' : 'Resume'], [$('#ph-play'), on ? 'Pause' : 'Resume']]) {
       $('use', btn).setAttribute('href', on ? '#i-pause' : '#i-play');
       $('span', btn).textContent = label;
     }
@@ -934,7 +1111,7 @@ Quando você terminar, as legendas já estão prontas.`;
     r = Math.min(4.4, Math.max(1.6, Math.round(r * 10) / 10));
     voice.setRate(r);
     rateIn.value = r;
-    rateOut.textContent = `${num(r)} pal/s`;
+    rateOut.textContent = `${num(r)} words/s`;
   }
   rateIn.addEventListener('input', () => setRate(Number(rateIn.value)));
   const mine = $('#mytext');
@@ -960,9 +1137,9 @@ Quando você terminar, as legendas já estão prontas.`;
     }));
   }
   function phoneUi() {
-    phChip.textContent = voice.playing ? 'Lendo' : 'Pausado';
+    phChip.textContent = voice.playing ? 'Reading' : 'Paused';
     phChip.classList.toggle('paused', !voice.playing);
-    phTime.textContent = `${fmt(voice.t)} · faltam ${fmt(remainingSeconds())}`;
+    phTime.textContent = `${fmt(voice.t)} · ${fmt(remainingSeconds())} left`;
     let cur = -1;
     $$('button', secsEl).forEach((b, n) => { if (Number(b.dataset.index) <= reader.est) cur = n; });
     $$('button', secsEl).forEach((b, n) => b.classList.toggle('cur', n === cur));
@@ -1034,8 +1211,8 @@ Quando você terminar, as legendas já estão prontas.`;
   }
 
   /* ───────── Alinhamento: a matriz de verdade (programação dinâmica, como no app) ───────── */
-  const SCRIPT = 'o texto sobe no seu ritmo e para quando você para'.split(' ');
-  const HEARD = 'o texto sob no seu ritmo para quando você é para'.split(' ');
+  const SCRIPT = 'the text moves at your pace and stops when you stop'.split(' ');
+  const HEARD = 'the text move at your pace stops when you uh stop'.split(' ');
   function lev(a, b) {
     const d = Array.from({ length: a.length + 1 }, (_, i) => [i]);
     for (let j = 1; j <= b.length; j++) d[0][j] = j;
@@ -1193,16 +1370,16 @@ Quando você terminar, as legendas já estão prontas.`;
 
   /* ───────── O roteiro dirigindo o OBS ───────── */
   const SHOW = [
-    { k: 'h', text: '# Abertura' },
-    { k: 't', text: 'Boa noite! [sorria] Hoje a gente fala de teleprompters.' },
-    { k: 'a', text: '[cena: Close]', scene: 'close', label: 'Câmera 2 · Close' },
-    { k: 't', text: 'Repare como a câmera fechou no rosto.' },
-    { k: 'c', text: '[capítulo: Bastidores]', chapter: 'Bastidores' },
-    { k: 't', text: 'Nos bastidores, cada capítulo vira uma marca na gravação.' },
-    { k: 'a', text: '[cena: Lateral]', scene: 'lado', label: 'Câmera 3 · Lateral' },
-    { k: 't', text: 'E dá para trocar de ângulo sem tocar no mouse.' },
-    { k: 'a', text: '[cena: Geral]', scene: 'geral', label: 'Câmera 1 · Geral' },
-    { k: 't', text: 'Boa gravação!' },
+    { k: 'h', text: '# Opening' },
+    { k: 't', text: 'Good evening! [smile] Tonight we talk about teleprompters.' },
+    { k: 'a', text: '[cena: Close]', scene: 'close', label: 'Camera 2 · Close' },
+    { k: 't', text: 'Notice how the camera cut to a close-up.' },
+    { k: 'c', text: '[capítulo: Backstage]', chapter: 'Backstage' },
+    { k: 't', text: 'Backstage, each chapter becomes a marker in the recording.' },
+    { k: 'a', text: '[cena: Side]', scene: 'lado', label: 'Camera 3 · Side' },
+    { k: 't', text: 'And you can change angles without touching the mouse.' },
+    { k: 'a', text: '[cena: Wide]', scene: 'geral', label: 'Camera 1 · Wide' },
+    { k: 't', text: 'Enjoy the recording!' },
   ];
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
   const scriptEl = $('#obs-script');
@@ -1248,9 +1425,9 @@ Quando você terminar, as legendas já estão prontas.`;
     $$('.flag', rtrack).forEach((f) => f.remove());
     events.replaceChildren();
     program.dataset.scene = 'geral';
-    lower.textContent = 'Câmera 1 · Geral';
-    sceneName.textContent = 'Geral';
-    logEvent(`<b>Gravação iniciada</b> junto com a leitura`);
+    lower.textContent = 'Camera 1 · Wide';
+    sceneName.textContent = 'Wide';
+    logEvent(`<b>Recording started</b> with the reading`);
   }
   function updateObs(dt, force) {
     if (!force && (reduce || !studioVisible)) return;
@@ -1264,14 +1441,14 @@ Quando você terminar, as legendas já estão prontas.`;
       const l = SHOW[obsLine];
       lines.forEach((el, k) => { el.classList.toggle('on', k === obsLine); el.classList.toggle('done', k < obsLine); });
       if (!l) break;
-      if (l.scene) { cut(l.scene, l.label); logEvent(`Cena: <b>${esc(l.label.split(' · ')[1])}</b>`); }
+      if (l.scene) { cut(l.scene, l.label); logEvent(`Scene: <b>${esc(l.label.split(' · ')[1])}</b>`); }
       if (l.chapter) {
         const f = document.createElement('div');
         f.className = 'flag';
         f.style.left = `${(obsT / total) * 100}%`;
         f.innerHTML = `<span>${esc(l.chapter)}</span>`;
         rtrack.appendChild(f);
-        logEvent(`Capítulo: <b>${esc(l.chapter)}</b>`);
+        logEvent(`Chapter: <b>${esc(l.chapter)}</b>`);
       }
     }
     rfill.style.width = `${Math.min(100, (obsT / total) * 100)}%`;
@@ -1314,7 +1491,7 @@ Quando você terminar, as legendas já estão prontas.`;
 
   /* ───────── QR code da versão web ───────── */
   if (window.QRious) {
-    new QRious({ element: $('#qr'), value: new URL('../', location.href).href, size: 224, padding: 14, background: '#edece6', foreground: '#0b0c10', level: 'M' });
+    new QRious({ element: $('#qr'), value: new URL('../app/', location.href).href, size: 224, padding: 14, background: '#edece6', foreground: '#0b0c10', level: 'M' });
   } else {
     $('#qr').hidden = true;
   }

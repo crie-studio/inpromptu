@@ -1,0 +1,31 @@
+# InPromptu
+
+> InPromptu is a free, open-source (MIT) teleprompter that follows your voice. It recognizes the words you say on your own computer (offline, with Vosk) and matches them against your script, so the text moves at your pace, stops when you stop and finds you again if you skip a sentence. It runs as a Windows app and in the browser. Created and developed by Luiz Felipe Pitzer (https://lfp.app.br). The interface is in Brazilian Portuguese.
+
+O InPromptu é um teleprompter grátis e de código aberto que acompanha a voz, com reconhecimento offline, para Windows e para o navegador.
+
+## Links
+
+- [Página do InPromptu (português)](__SITE__): o que ele faz, com demonstrações e perguntas frequentes
+- [InPromptu page (English)](__SITE__en/)
+- [Web app / versão web](__SITE__app/): runs in Chrome, Edge, Firefox and Safari; nothing to install
+- [Download for Windows](https://github.com/crie-studio/inpromptu/releases/latest): installer for Windows 10 and 11
+- [Source code](https://github.com/crie-studio/inpromptu): MIT license, issues and changelog
+
+## Key facts
+
+- Price: free. No account, no ads, no paid tier.
+- Voice tracking: word by word, offline. Guided recognition (Vosk) that only listens for the script's words, a voice activity detector (Silero VAD) and an alignment step that tolerates skipped, swapped and extra words. Learns the reader's pace.
+- Languages for voice tracking: Portuguese, English and Spanish on the web; the Windows app adds French, German and Italian. Classic (constant speed) and voice-activated modes work with any language.
+- Privacy: audio never leaves the computer; the voice model (about 31 MB for Portuguese) is downloaded once. No telemetry.
+- Display: a strip at the top of the screen near the webcam (Windows), a floating window on top of other apps, mirrored full screen for beam-splitter teleprompter glass and a mirrored second screen.
+- OBS Studio: starts and stops recording with the reading, switches scenes with [cena: Name] and adds chapters with [capítulo: Name] (obs-websocket v5).
+- Subtitles: writes an .srt file with the time each word was said.
+- Phone remote: control the reading from a phone browser by scanning a QR code (local network in the Windows app, internet in the web version).
+- Script markup: [notes] in brackets are shown but not read; lines starting with # are sections (keys 1–9 jump to them).
+- Files: .inpromptu, .txt, .md and .pptx (imports speaker notes).
+- Current version: __VERSION__.
+
+## Similar apps
+
+InPromptu is an alternative to PromptSmart, Teleprompter.com, Speakflow, Speechius and Textream (macOS), with offline word-by-word voice tracking, OBS integration and automatic subtitles.

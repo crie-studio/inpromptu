@@ -1,7 +1,7 @@
 // Service worker da versão web: guarda o app para abrir sem internet e entrega os modelos de voz
 // já baixados (Cache Storage "inpromptu-modelos", preenchido pelo editor).
 const VERSION = '__VERSION__';
-const SHELL = `inpromptu-app-${VERSION}`;
+const SHELL = `inpromptu-web-${VERSION}`; // (inpromptu-app-* era o app antigo, na raiz do site)
 const MODELS = 'inpromptu-modelos';
 const PRECACHE = __PRECACHE__;
 
@@ -11,7 +11,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys()
-    .then((keys) => Promise.all(keys.filter((k) => k.startsWith('inpromptu-app-') && k !== SHELL).map((k) => caches.delete(k))))
+    .then((keys) => Promise.all(keys.filter((k) => k.startsWith('inpromptu-web-') && k !== SHELL).map((k) => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 

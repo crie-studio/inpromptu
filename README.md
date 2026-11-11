@@ -9,8 +9,8 @@
 
 <p align="center">
   <a href="../../releases/latest"><b>Baixar para Windows</b></a> ·
-  <a href="https://crie-studio.github.io/inpromptu/"><b>Usar no navegador</b></a> ·
-  <a href="https://crie-studio.github.io/inpromptu/sobre/">Conhecer</a> ·
+  <a href="https://crie-studio.github.io/inpromptu/app/"><b>Usar no navegador</b></a> ·
+  <a href="https://crie-studio.github.io/inpromptu/">Conhecer</a> ·
   <a href="#como-usar">Como usar</a> ·
   <a href="README.en.md">English</a>
 </p>
@@ -109,7 +109,7 @@ Também dá para abrir um texto por link: `inpromptu://read?text=Olá%20mundo`.
 
 ## Versão web
 
-Abra **<https://crie-studio.github.io/inpromptu/>** no Chrome ou no Edge (também funciona no Firefox e no Safari,
+Abra **<https://crie-studio.github.io/inpromptu/app/>** no Chrome ou no Edge (também funciona no Firefox e no Safari,
 com menos recursos). Não precisa instalar nada; se quiser, o navegador oferece instalar como app. O editor, o
 teleprompter e o reconhecimento de voz são os mesmos do app de Windows, e o reconhecimento continua rodando no seu
 computador: o modelo de voz é baixado uma vez e fica guardado no navegador.
@@ -191,6 +191,7 @@ Estrutura:
 - `renderer/engine.*` — janela oculta com microfone, detector de voz e reconhecimento, em WebAssembly
 - `renderer/remote.html` — a página do celular
 - `renderer/shared/text.js` — divisão em palavras, marcações e alinhamento da leitura
+- `web/landing/` — a página do site (português e inglês), sitemap e `llms.txt`; textos de divulgação em [docs/DIVULGACAO.md](docs/DIVULGACAO.md)
 - `web/` — versão web: `bridge.js` faz o papel do preload do Electron e `hub.js` o do `main.js`, para as mesmas telas
   rodarem no navegador; `scripts/build-web.js` monta o site
 - `.github/workflows/` — testes a cada mudança, o build das versões (veja [docs/ASSINATURA.md](docs/ASSINATURA.md))

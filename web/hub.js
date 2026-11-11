@@ -250,7 +250,19 @@ let installedReady = Promise.resolve();
 async function refreshInstalled() {
   try {
     const cache = await caches.open(MODEL_CACHE);
-    for (const m of MODELS) if (await cache.match(modelUrlFor(m.id))) installed.add(m.id);
+    for (const m of MODELS) {
+      const url = modelUrlFor(m.id);
+      if (!(await cache.match(url))) {
+        // O app morava na raiz do site (…/models/): o modelo baixado ali vale aqui também.
+        const old = new URL(`../models/${m.file}.tar.gz`, location.href).href;
+        const hit = await cache.match(old);
+        if (hit) {
+          await cache.put(url, hit);
+          await cache.delete(old);
+        }
+      }
+      if (await cache.match(url)) installed.add(m.id);
+    }
   } catch { /* sem Cache Storage (site sem https) */ }
 }
 

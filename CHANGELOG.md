@@ -2,7 +2,7 @@
 
 ## 2.1.0
 
-- **Versão web**: o InPromptu agora também roda no navegador, em <https://crie-studio.github.io/inpromptu/>, com o
+- **Versão web**: o InPromptu agora também roda no navegador, em <https://crie-studio.github.io/inpromptu/app/>, com o
   mesmo editor, teleprompter e rastreamento de voz offline. Janela flutuante por cima dos outros programas (Chrome
   e Edge), tela cheia, segunda tela, OBS, legendas e controle pelo celular pela internet, em qualquer rede. Pode ser
   instalada como app e funciona sem internet depois da primeira visita.

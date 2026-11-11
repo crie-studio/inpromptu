@@ -9,8 +9,8 @@
 
 <p align="center">
   <a href="../../releases/latest"><b>Download for Windows</b></a> ·
-  <a href="https://crie-studio.github.io/inpromptu/"><b>Use in your browser</b></a> ·
-  <a href="https://crie-studio.github.io/inpromptu/sobre/">Tour (Portuguese)</a> ·
+  <a href="https://crie-studio.github.io/inpromptu/app/"><b>Use in your browser</b></a> ·
+  <a href="https://crie-studio.github.io/inpromptu/en/">Website</a> ·
   <a href="README.md">Português</a>
 </p>
 
@@ -54,7 +54,7 @@ sentence. Everything runs on your computer: no audio ever leaves your machine.
 
 ## Web version
 
-Open **<https://crie-studio.github.io/inpromptu/>** in Chrome or Edge (Firefox and Safari work too, with fewer
+Open **<https://crie-studio.github.io/inpromptu/app/>** in Chrome or Edge (Firefox and Safari work too, with fewer
 features). It runs the same editor, teleprompter and on-device voice tracking as the Windows app; the voice model
 is downloaded once and kept in the browser. The phone remote connects over the internet, from any network. The
 strip near the camera, hiding from screen recordings and system-wide shortcuts are Windows-only.
