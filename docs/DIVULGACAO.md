@@ -145,8 +145,14 @@ winget install wingetcreate
 ```
 
 ```bash
-wingetcreate new https://github.com/crie-studio/inpromptu/releases/download/v2.0.1/InPromptu-Setup-2.0.1.exe
+wingetcreate new https://github.com/crie-studio/inpromptu/releases/download/v2.2.0/InPromptu-Setup-2.2.0.exe
 ```
 
 Ela pergunta os dados e abre o pedido (pull request) no repositório `microsoft/winget-pkgs` com a sua conta do
 GitHub. Os arquivos já preenchidos para conferir estão em [`docs/winget/`](winget/).
+
+Depois que o InPromptu entrar no catálogo, cada versão nova é só um comando (troque a versão nos dois lugares):
+
+```bash
+wingetcreate update LuizFelipePitzer.InPromptu --version 2.2.0 --urls https://github.com/crie-studio/inpromptu/releases/download/v2.2.0/InPromptu-Setup-2.2.0.exe --submit
+```

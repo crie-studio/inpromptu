@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
 PackageIdentifier: LuizFelipePitzer.InPromptu
-PackageVersion: 2.0.1
+PackageVersion: 2.2.0
 PackageLocale: en-US
 Publisher: Luiz Felipe Pitzer
 PublisherUrl: https://lfp.app.br
@@ -10,7 +10,7 @@ License: MIT
 LicenseUrl: https://github.com/crie-studio/inpromptu/blob/main/LICENSE
 Copyright: Copyright (c) 2026 Luiz Felipe Pitzer
 ShortDescription: Free, open-source teleprompter that follows your voice offline.
-Description: InPromptu highlights each word as you speak and scrolls at your pace, using offline speech recognition guided by your script. It works with OBS Studio, writes .srt subtitles, mirrors the text for beam-splitter teleprompters and can be controlled from a phone. Interface in Portuguese.
+Description: InPromptu highlights each word as you speak and scrolls at your pace, using offline speech recognition guided by your script. It works with OBS Studio, writes .srt subtitles, mirrors the text for beam-splitter teleprompters and can be controlled from a phone. Interface in English and Portuguese.
 Moniker: inpromptu
 Tags:
   - teleprompter
@@ -18,6 +18,6 @@ Tags:
   - obs
   - video
   - autocue
-ReleaseNotesUrl: https://github.com/crie-studio/inpromptu/releases/tag/v2.0.1
+ReleaseNotesUrl: https://github.com/crie-studio/inpromptu/releases/tag/v2.2.0
 ManifestType: defaultLocale
 ManifestVersion: 1.9.0
